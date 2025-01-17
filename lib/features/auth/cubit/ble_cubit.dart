@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:frontend/core/services/ble_services/service_discovery.dart';
+import 'package:frontend/core/services/sp_service.dart';
 import 'package:frontend/features/home/pages/scan_page.dart';
+import 'package:frontend/features/widgets/scanned_devices.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -14,7 +16,22 @@ class BleCubit extends Cubit<BleState> {
   /// Observable list to store scanned BLE devices
   RxList<DiscoveredDevice> devices = <DiscoveredDevice>[].obs;
 
-  BleCubit() : super(BleInitial());
+  /// To store the currently connected device ID
+  String? _connectedDeviceId;
+
+  BleCubit() : super(BleInitial()) {
+    _checkForPreviousConnection();
+  }
+
+  /// Check for a previously connected device on app start
+  Future<void> _checkForPreviousConnection() async {
+    final prefs = SpService();
+    _connectedDeviceId = await prefs.getConnectedDeviceId();
+
+    if (_connectedDeviceId != null) {
+      await _reconnectToDevice(_connectedDeviceId!);
+    }
+  }
 
   /// Requests necessary Bluetooth permissions
   Future<bool> _requestPermissions() async {
@@ -103,9 +120,51 @@ class BleCubit extends Cubit<BleState> {
   Future<void> connectToDevice(String deviceId) async {
     try {
       emit(BleConnecting());
+      bool isNavigated = false;
+
       final connectionStream = _ble.connectToDevice(
         id: deviceId,
-        connectionTimeout: const Duration(seconds: 2),
+        connectionTimeout: const Duration(seconds: 5), // Adjusted timeout
+      );
+
+      connectionStream.listen(
+        (connectionState) {
+          if (connectionState.connectionState ==
+                  DeviceConnectionState.connected &&
+              !isNavigated) {
+            isNavigated = true;
+            final prefs = SpService();
+            prefs.setConnectedDeviceId(deviceId); // Save connection
+            emit(BleConnected(deviceId));
+            Get.snackbar('Connected', 'Bluetooth Connected Successfully');
+            Get.off(() => ServiceDiscoveryPage(deviceId: deviceId));
+          } else if (connectionState.connectionState ==
+                  DeviceConnectionState.disconnected &&
+              !isNavigated) {
+            isNavigated = true;
+            emit(BleDisconnected());
+            Get.snackbar('Failed', 'Failed to Connect to the device');
+            Get.to(() => const ScannedDevices());
+          }
+        },
+        onError: (error) {
+          emit(BleError('Connection error: $error'));
+          print('Error details: $error'); // Debugging details
+        },
+      );
+    } catch (e) {
+      emit(BleError('Failed to connect: $e'));
+    }
+  }
+
+  /// Reconnect to a device
+  Future<void> _reconnectToDevice(String deviceId) async {
+    try {
+      emit(BleConnecting());
+
+      final connectionStream = _ble.connectToDevice(
+        id: deviceId,
+        connectionTimeout: const Duration(seconds: 5),
       );
 
       connectionStream.listen(
@@ -113,21 +172,33 @@ class BleCubit extends Cubit<BleState> {
           if (connectionState.connectionState ==
               DeviceConnectionState.connected) {
             emit(BleConnected(deviceId));
-            Get.snackbar('Connected', 'Bluetooth Connected Successfully');
+            Get.snackbar('Reconnected', 'Bluetooth Reconnected to $deviceId');
             Get.off(() => ServiceDiscoveryPage(deviceId: deviceId));
-          } else if (connectionState.connectionState ==
-              DeviceConnectionState.disconnected) {
-            emit(BleDisconnected());
-            Get.snackbar('Disconnected', 'Bluetooth Disconnected');
-            Get.to(() => const ScanPage());
           }
         },
         onError: (error) {
-          emit(BleError('Connection error: $error'));
+          emit(BleError('Reconnection error: $error'));
+          Get.off(() => const ScanPage());
         },
       );
     } catch (e) {
-      emit(BleError('Failed to connect: $e'));
+      emit(BleError('Failed to reconnect: $e'));
+      Get.off(() => const ScanPage());
+    }
+  }
+
+  /// Disconnect from the device
+  Future<void> disconnectDevice() async {
+    try {
+      _connectedDeviceId = null;
+      final prefs = SpService();
+      prefs.clearConnectedDeviceId(); // Remove connection state
+
+      emit(BleDisconnected());
+      Get.snackbar('Disconnected', 'Bluetooth Disconnected Successfully');
+      Get.off(() => const ScanPage());
+    } catch (e) {
+      emit(BleError('Failed to disconnect: $e'));
     }
   }
 
