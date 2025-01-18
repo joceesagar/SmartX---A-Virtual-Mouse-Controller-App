@@ -30,11 +30,12 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: const Text(
           "Device Settings",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
+        backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
-        padding: const EdgeInsets.only(left: 12),
+        padding: const EdgeInsets.all(12),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text("Update Rate: ${_currentSliderValue}Hz",
               style: const TextStyle(

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:frontend/core/services/ble_services/service_discovery.dart';
 import 'package:frontend/core/services/sp_service.dart';
+import 'package:frontend/features/home/pages/options_page.dart';
 import 'package:frontend/features/home/pages/scan_page.dart';
 import 'package:frontend/features/widgets/scanned_devices.dart';
 import 'package:get/get.dart';
@@ -27,9 +28,12 @@ class BleCubit extends Cubit<BleState> {
   Future<void> _checkForPreviousConnection() async {
     final prefs = SpService();
     _connectedDeviceId = await prefs.getConnectedDeviceId();
-
-    if (_connectedDeviceId != null) {
-      await _reconnectToDevice(_connectedDeviceId!);
+    if (await _requestPermissions() && await _isBluetoothOn()) {
+      if (_connectedDeviceId != null) {
+        await _reconnectToDevice(_connectedDeviceId!);
+      }
+    } else {
+      emit(PermissionNotGranted());
     }
   }
 
@@ -97,19 +101,20 @@ class BleCubit extends Cubit<BleState> {
 
         // Stop scanning after the timeout
         await subscription.cancel();
-        _ble.deinitialize();
 
         // Check if any devices were found
         if (devices.isNotEmpty) {
           emit(BleScanSuccess(devices)); // Emit success with the device list
         } else {
           emit(BleNoDevicesFound()); // Emit "No Devices Found" state
+          _ble.deinitialize();
         }
 
         print('Devices: $devices');
       } catch (error) {
         emit(
             BleScanningError('Scan error: $error')); // Handle unexpected errors
+        _ble.deinitialize();
       }
     } else {
       emit(PermissionNotGranted());
@@ -136,8 +141,10 @@ class BleCubit extends Cubit<BleState> {
             final prefs = SpService();
             prefs.setConnectedDeviceId(deviceId); // Save connection
             emit(BleConnected(deviceId));
-            Get.snackbar('Connected', 'Bluetooth Connected Successfully');
-            Get.off(() => ServiceDiscoveryPage(deviceId: deviceId));
+            Get.snackbar('Connected', 'Bluetooth Connected Successfully',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.green);
+            Get.off(() => const OptionsPage());
           } else if (connectionState.connectionState ==
                   DeviceConnectionState.disconnected &&
               !isNavigated) {
@@ -149,11 +156,13 @@ class BleCubit extends Cubit<BleState> {
         },
         onError: (error) {
           emit(BleError('Connection error: $error'));
+          Get.off(() => const ScannedDevices());
           print('Error details: $error'); // Debugging details
         },
       );
     } catch (e) {
       emit(BleError('Failed to connect: $e'));
+      Get.off(() => const ScannedDevices());
     }
   }
 
@@ -161,6 +170,12 @@ class BleCubit extends Cubit<BleState> {
   Future<void> _reconnectToDevice(String deviceId) async {
     try {
       emit(BleConnecting());
+      if (state is BleConnecting) {
+        Get.snackbar('Reconnecting', 'Please wait for some time',
+            margin: const EdgeInsets.only(bottom: 10),
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.amber[100]);
+      }
 
       final connectionStream = _ble.connectToDevice(
         id: deviceId,
@@ -171,18 +186,33 @@ class BleCubit extends Cubit<BleState> {
         (connectionState) {
           if (connectionState.connectionState ==
               DeviceConnectionState.connected) {
+            final prefs = SpService();
+            prefs.setConnectedDeviceId(deviceId);
             emit(BleConnected(deviceId));
-            Get.snackbar('Reconnected', 'Bluetooth Reconnected to $deviceId');
-            Get.off(() => ServiceDiscoveryPage(deviceId: deviceId));
+            Get.snackbar('Reconnected', 'Bluetooth Reconnected to $deviceId',
+                margin: const EdgeInsets.only(bottom: 10),
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.green);
+            Get.off(() => const OptionsPage());
+          } else if (connectionState.connectionState ==
+              DeviceConnectionState.disconnected) {
+            emit(BleDisconnected());
+            Get.snackbar('Failed', 'Failed to Connect to the device',
+                margin: const EdgeInsets.only(bottom: 10),
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.red,
+                colorText: Colors.white); // Reconnect failed
           }
         },
         onError: (error) {
           emit(BleError('Reconnection error: $error'));
+          emit(BleDisconnected());
           Get.off(() => const ScanPage());
         },
       );
     } catch (e) {
       emit(BleError('Failed to reconnect: $e'));
+      emit(BleDisconnected());
       Get.off(() => const ScanPage());
     }
   }
@@ -193,6 +223,7 @@ class BleCubit extends Cubit<BleState> {
       _connectedDeviceId = null;
       final prefs = SpService();
       prefs.clearConnectedDeviceId(); // Remove connection state
+      _ble.deinitialize();
 
       emit(BleDisconnected());
       Get.snackbar('Disconnected', 'Bluetooth Disconnected Successfully');

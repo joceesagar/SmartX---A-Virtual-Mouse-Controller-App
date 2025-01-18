@@ -58,9 +58,9 @@ class _ShortcutPageState extends State<ShortcutPage> {
       appBar: AppBar(
         title: const Text(
           "Keyboard Shortcuts",
-          style: TextStyle(
-              color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
+        backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),

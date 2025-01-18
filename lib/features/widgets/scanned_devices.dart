@@ -15,55 +15,55 @@ class ScannedDevices extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-          toolbarHeight: 90,
-          elevation: 20,
-          title: Column(
-            children: [
-              const Text(
-                'Scanned BLE Devices',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  const Text("Status: ",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  BlocBuilder<BleCubit, BleState>(
-                    builder: (context, state) {
-                      if (state is BleConnected) {
-                        return const Text("Connected",
-                            style: TextStyle(
-                                color: Colors.green,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold));
-                      } else if (state is BleConnecting) {
-                        return const Text("Connecting...",
-                            style: TextStyle(
-                                color: Colors.red,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold));
-                      } else {
-                        return const Text("Disconnected",
-                            style: TextStyle(
-                                color: Colors.red,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold));
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ],
-          )),
+        toolbarHeight: 90,
+        elevation: 20,
+        title: Column(
+          children: [
+            const Text(
+              'Scanned BLE Devices',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const Text("Status: ",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                BlocBuilder<BleCubit, BleState>(
+                  builder: (context, state) {
+                    if (state is BleConnected) {
+                      return const Text("Connected",
+                          style: TextStyle(
+                              color: Colors.green,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold));
+                    } else if (state is BleConnecting) {
+                      return const Text("Connecting...",
+                          style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold));
+                    } else {
+                      return const Text("Disconnected",
+                          style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold));
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
       body: BlocBuilder<BleCubit, BleState>(
         builder: (context, state) {
           // Directly accessing devices from BleScanSuccess state
           final devices = context.read<BleCubit>().devices;
-
           return ListView.builder(
             itemCount: devices.length,
             itemBuilder: (context, index) {
@@ -115,11 +115,18 @@ class ScannedDevices extends StatelessWidget {
                             // Trigger device connection
                             bleCubit.connectToDevice(device.id);
                           },
+                          style: ButtonStyle(
+                              backgroundColor:
+                                  WidgetStatePropertyAll(Colors.grey[200]),
+                              shadowColor:
+                                  const WidgetStatePropertyAll(Colors.black),
+                              elevation: const WidgetStatePropertyAll(10)),
                           child: const Text(
                             "Connect",
                             style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
                           ),
                         ),
                       ],

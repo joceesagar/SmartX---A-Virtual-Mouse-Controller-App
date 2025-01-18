@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/features/auth/cubit/auth_cubit.dart';
 import 'package:frontend/features/auth/pages/login_page.dart';
+import 'package:frontend/features/home/pages/scan_page.dart';
+import 'package:get/get.dart';
 
 class SignupPage extends StatefulWidget {
   static MaterialPageRoute route() => MaterialPageRoute(
@@ -34,6 +36,10 @@ class _SignupPageState extends State<SignupPage> {
           email: emailController.text.trim(),
           password: passwordController.text.trim());
     }
+  }
+
+  void guestLogin() {
+    context.read<AuthCubit>().handleGuestLogin();
   }
 
   @override
@@ -71,7 +77,7 @@ class _SignupPageState extends State<SignupPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  "Sign Up.",
+                  "Sign Up",
                   style: TextStyle(
                     fontSize: 50,
                     fontWeight: FontWeight.bold,
@@ -175,7 +181,32 @@ class _SignupPageState extends State<SignupPage> {
                       ],
                     ),
                   ),
-                )
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  "-------------------------OR-------------------------",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.grey[400]),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    guestLogin();
+                    Get.to(() => const ScanPage());
+                  },
+                  child: RichText(
+                    text: const TextSpan(
+                        text: "Continue as Guest",
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold)),
+                  ),
+                ),
               ],
             ),
           ),
