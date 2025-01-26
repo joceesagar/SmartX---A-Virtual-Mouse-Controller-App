@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/core/services/sp_service.dart';
 import 'package:frontend/features/auth/cubit/auth_cubit.dart';
 import 'package:frontend/features/auth/cubit/ble_cubit.dart';
 import 'package:frontend/features/auth/pages/signup_page.dart';
@@ -71,6 +72,9 @@ class _MyAppState extends State<MyApp> {
       home: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
           if (state is AuthLoggedIn || state is AuthGuest) {
+            // print("IsAuthGuest: ${SpService().isGuestLoggedIn()}");
+            // print("AuthGuest: ${SpService().getGuestId()}");
+            // print(state);
             return const ScanPage();
           }
           return const SignupPage();

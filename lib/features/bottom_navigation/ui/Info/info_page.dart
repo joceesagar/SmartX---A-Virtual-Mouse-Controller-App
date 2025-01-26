@@ -2,41 +2,54 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/features/auth/cubit/auth_cubit.dart';
 import 'package:frontend/features/auth/cubit/ble_cubit.dart';
+import 'package:frontend/features/auth/pages/signup_page.dart';
 
 class InfoPage extends StatelessWidget {
   const InfoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Device Info",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthInitial) {
+          // Navigate to SignupPage and clear stack
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const SignupPage()),
+            (route) => false, // Remove all previous routes
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            "Device Info",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.blueAccent,
         ),
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoSection("Device Name", "My Awesome Device"),
-            _buildInfoSection("Device ID", "1234567890"),
-            _buildInfoSection("MAC Address", "00:1A:7D:DA:71:13"),
-            _buildInfoSection("User Name", "John Doe"),
-            _buildInfoSection("User ID", "9876543210"),
-            const SizedBox(height: 40),
-            _buildActionButton("Disconnect", Colors.red, () {
-              // Add Disconnect functionality here
-              context.read<BleCubit>().disconnectDevice();
-            }),
-            const SizedBox(height: 20),
-            _buildActionButton("Logout", Colors.red, () {
-              // Add Logout functionality here
-              context.read<AuthCubit>().logout();
-            }),
-          ],
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildInfoSection("Device Name", "My Awesome Device"),
+              _buildInfoSection("Device ID", "1234567890"),
+              _buildInfoSection("MAC Address", "00:1A:7D:DA:71:13"),
+              _buildInfoSection("User Name", "John Doe"),
+              _buildInfoSection("User ID", "9876543210"),
+              const SizedBox(height: 40),
+              _buildActionButton("Disconnect", Colors.red, () {
+                // Add Disconnect functionality here
+                context.read<BleCubit>().disconnectDevice();
+              }),
+              const SizedBox(height: 20),
+              _buildActionButton("Logout", Colors.red, () {
+                // Add Logout functionality here
+                context.read<AuthCubit>().logout();
+              }),
+            ],
+          ),
         ),
       ),
     );

@@ -1,7 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
-import 'package:frontend/core/services/ble_services/service_discovery.dart';
 import 'package:frontend/core/services/sp_service.dart';
 import 'package:frontend/features/home/pages/options_page.dart';
 import 'package:frontend/features/home/pages/scan_page.dart';
@@ -144,7 +145,7 @@ class BleCubit extends Cubit<BleState> {
             Get.snackbar('Connected', 'Bluetooth Connected Successfully',
                 snackPosition: SnackPosition.BOTTOM,
                 backgroundColor: Colors.green);
-            Get.off(() => const OptionsPage());
+            Get.to(() => const OptionsPage());
           } else if (connectionState.connectionState ==
                   DeviceConnectionState.disconnected &&
               !isNavigated) {
@@ -230,6 +231,63 @@ class BleCubit extends Cubit<BleState> {
       Get.off(() => const ScanPage());
     } catch (e) {
       emit(BleError('Failed to disconnect: $e'));
+    }
+  }
+
+  final characteristic = QualifiedCharacteristic(
+      serviceId: Uuid.parse("785e99cc-e61f-41b0-899e-f59fa295441a"),
+      characteristicId: Uuid.parse("7fb99d10-d067-42f2-99f4-b515e595c91c"),
+      deviceId: "48:27:E2:D3:13:DD");
+
+  /// Subscribe to SharedPreferences changes and write updates to BLE
+  Future<void> subscribeAndWrite(List<String> keys) async {
+    if (state is BleConnected) {
+      try {
+        // Step 1: Write default value initially
+        for (final key in keys) {
+          final initialValue = await SpService().getValue(key);
+          emit(BleWriting());
+          print('Initial values: $initialValue');
+          await _writeToBle(characteristic, initialValue, key);
+        }
+        // Step 2: Listen to SharedPreferences changes
+        SpService().onKeyChanged.listen((event) async {
+          final updatedKey = event.key;
+          final updatedValue = event.value;
+          print('Value Updated Successfully $updatedValue');
+
+          if (keys.contains(updatedKey)) {
+            await _writeToBle(characteristic, updatedValue, updatedKey);
+          }
+        });
+      } catch (e) {
+        emit(BleWriteError("Error during subscription or writing: $e"));
+      }
+    } else {
+      Get.snackbar("NotConnected", "Bluetooth is not connected");
+    }
+  }
+
+  /// Write value to BLE characteristic
+  Future<void> _writeToBle(
+      QualifiedCharacteristic characteristic, String value, String key) async {
+    print(ascii.encode(value));
+    try {
+      await _ble.writeCharacteristicWithoutResponse(
+        characteristic,
+        value: ascii.encode('$key: $value'),
+      );
+      print("WRITTEN SUCCESSFULLY");
+
+      emit(BleConnected("48:27:E2:D3:13:DD"));
+      Get.snackbar("Success", "Value Written successfully",
+          backgroundColor: Colors.green,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10));
+    } catch (e) {
+      print(e);
+      Get.snackbar("Error", "Error writing value");
+      emit(BleConnected("48:27:E2:D3:13:DD"));
     }
   }
 

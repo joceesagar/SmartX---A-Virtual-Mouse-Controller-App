@@ -17,9 +17,11 @@ class OptionsPage extends StatelessWidget {
         elevation: 20,
         title: Column(
           children: [
-            const Text(
-              'Options',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
+            const Center(
+              child: Text(
+                'Options',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
+              ),
             ),
             const SizedBox(
               height: 5,

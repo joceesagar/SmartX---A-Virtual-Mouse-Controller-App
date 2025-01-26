@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:frontend/core/services/sp_service.dart';
@@ -96,17 +95,21 @@ class AuthCubit extends Cubit<AuthState> {
   /// Handles logout
   Future<void> logout() async {
     try {
-      emit(AuthLoading());
+      emit(AuthLoading()); // Emit loading state
+
+      // Handle AuthLoggedIn or AuthGuest-specific logic
       if (state is AuthLoggedIn) {
         await spService.removeToken();
       } else if (state is AuthGuest) {
         await spService.guestLogout();
       }
+
+      // Clear connected device and deinitialize BLE
       final prefs = SpService();
       prefs.clearConnectedDeviceId(); // Remove connection state
-      _ble.deinitialize();
-      emit(AuthInitial());
-      Get.off(() => const SignupPage());
+      _ble.deinitialize(); // Deinitialize BLE service
+
+      Get.off(() => const SignupPage()); // Navigate to signup page
     } catch (e) {
       emit(AuthError('Failed to log out: ${e.toString()}'));
     }
