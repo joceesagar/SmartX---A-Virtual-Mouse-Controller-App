@@ -4,6 +4,8 @@ import 'package:frontend/core/services/sp_service.dart';
 import 'package:frontend/features/auth/cubit/auth_cubit.dart';
 import 'package:frontend/features/auth/cubit/ble_cubit.dart';
 import 'package:frontend/features/auth/pages/signup_page.dart';
+import 'package:frontend/features/bottom_navigation/ui/Settings/setting_page.dart';
+import 'package:frontend/features/home/pages/home_page.dart';
 import 'package:frontend/features/home/pages/scan_page.dart';
 import 'package:get/get.dart';
 
@@ -34,52 +36,54 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Task App',
-      theme: ThemeData(
-        inputDecorationTheme: InputDecorationTheme(
-          contentPadding: const EdgeInsets.all(27),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.grey.shade300,
-              width: 3,
+        title: 'Task App',
+        theme: ThemeData(
+          inputDecorationTheme: InputDecorationTheme(
+            contentPadding: const EdgeInsets.all(27),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.grey.shade300,
+                width: 3,
+              ),
+              borderRadius: BorderRadius.circular(10),
             ),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(width: 3),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          border: OutlineInputBorder(
-            borderSide: const BorderSide(width: 3),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.red, width: 3),
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.black,
-            minimumSize: const Size(60, 50),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(width: 3),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            border: OutlineInputBorder(
+              borderSide: const BorderSide(width: 3),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.red, width: 3),
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              minimumSize: const Size(60, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+            ),
+          ),
+          useMaterial3: true,
         ),
-        useMaterial3: true,
-      ),
-      home: BlocBuilder<AuthCubit, AuthState>(
-        builder: (context, state) {
-          if (state is AuthLoggedIn || state is AuthGuest) {
-            // print("IsAuthGuest: ${SpService().isGuestLoggedIn()}");
-            // print("AuthGuest: ${SpService().getGuestId()}");
-            // print(state);
-            return const ScanPage();
-          }
-          return const SignupPage();
-        },
-      ),
-    );
+        home: const HomePage()
+
+        // BlocBuilder<AuthCubit, AuthState>(
+        //   builder: (context, state) {
+        //     if (state is AuthLoggedIn || state is AuthGuest) {
+        //       // print("IsAuthGuest: ${SpService().isGuestLoggedIn()}");
+        //       // print("AuthGuest: ${SpService().getGuestId()}");
+        //       // print(state);
+        //       return const ScanPage();
+        //     }
+        //     return const SignupPage();
+        //   },
+        // ),
+        );
   }
 }

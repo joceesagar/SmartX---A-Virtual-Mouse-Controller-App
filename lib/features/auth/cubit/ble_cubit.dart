@@ -291,6 +291,27 @@ class BleCubit extends Cubit<BleState> {
     }
   }
 
+  Stream<String> readFromBle(QualifiedCharacteristic characteristic) {
+    try {
+      return _ble.subscribeToCharacteristic(characteristic).map((data) {
+        final response = ascii.decode(data);
+        print("RECEIVED DATA: $response");
+
+        emit(BleConnected("48:27:E2:D3:13:DD"));
+        Get.snackbar("Success", "Data Received: $response",
+            backgroundColor: Colors.blue,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10));
+
+        return response; // Now correctly returning data from the stream
+      });
+    } catch (e) {
+      print("Reading Error: $e");
+      emit(BleConnected("48:27:E2:D3:13:DD"));
+      return const Stream.empty();
+    }
+  }
+
   @override
   Future<void> close() {
     _ble.deinitialize(); // Clean up resources when the cubit is disposed
