@@ -30,9 +30,9 @@ class HomePageState extends State<HomePage> {
       'page': const CustomizationPage(),
     },
     {
-      'icon': Icons.eco_rounded,
-      'label': 'Data',
-      'page': VirtualHandScreen(),
+      'icon': Icons.tv,
+      'label': 'Visualization',
+      'page': const VirtualHandScreen(),
     },
     {
       'icon': Icons.info_outline,

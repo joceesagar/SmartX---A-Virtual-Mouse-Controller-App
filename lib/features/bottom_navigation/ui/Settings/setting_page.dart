@@ -39,9 +39,6 @@ enum SingingCharacter {
   Raw,
 }
 
-const List<String> list = <String>['One', 'Two', 'Three', 'Four'];
-typedef MenuEntry = DropdownMenuEntry<String>;
-
 class _SettingsPageState extends State<SettingsPage> {
   final spService = SpService();
 

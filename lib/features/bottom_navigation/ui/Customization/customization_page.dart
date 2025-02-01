@@ -34,22 +34,19 @@ void writeToBle(BuildContext context) {
   context.read<BleCubit>().subscribeAndWrite(keyList);
 }
 
-enum SingingCharacter {
-  Smooth,
-  Raw,
-}
+enum SingingCharacter { Index, Middle, Ring }
 
-const List<String> list = <String>['One', 'Two', 'Three', 'Four'];
-typedef MenuEntry = DropdownMenuEntry<String>;
+enum ScrollGesture { IndexMiddle, MiddleRing, IndexRing }
 
 class _CustomizationPage extends State<CustomizationPage> {
   final spService = SpService();
 
-  late double _gestureSensitivityValue;
-  late double _pointerSpeedValue;
-  late SingingCharacter? _character;
-  late bool value1;
-  late bool value2;
+  late double _scrollSpeedValue;
+  late SingingCharacter? _character1;
+  late SingingCharacter? _character2;
+  late SingingCharacter? _character3;
+  late ScrollGesture? _character4;
+
   bool isLoading = true;
 
   Future<void> initializeDefaults() async {
@@ -65,28 +62,59 @@ class _CustomizationPage extends State<CustomizationPage> {
 
   Future<void> _loadInitialValues() async {
     try {
-      final sliderValue1 = await spService.getValue('gestureSensitivity');
-      final sliderValue2 = await spService.getValue('pointerSpeed');
-      final vibrationFeedback = await spService.getValue('vibrationFeedback');
-      final invertCursorMovement =
-          await spService.getValue('invertCursorMovement');
-      final mode = await spService.getValue('trackingMode');
+      final sliderValue = await spService.getValue('scrollSpeed');
+      final leftClickMode = await spService.getValue('leftClick');
+      final rightClickMode = await spService.getValue('rightClick');
+      final doubleClickMode = await spService.getValue('doubleClick');
+      final scrollGestureMode = await spService.getValue('scrollGesture');
       // final primaryClick = await spService.getValue('primaryClick');
 
       if (mounted) {
         setState(() {
-          _gestureSensitivityValue = double.parse(sliderValue1);
-          _pointerSpeedValue = double.parse(sliderValue2);
-          value1 = (vibrationFeedback.toLowerCase() ==
-              "true"); //returns true if default value is true otherwise false
-          value2 = (invertCursorMovement.toLowerCase() == "true");
+          _scrollSpeedValue = double.parse(sliderValue);
 
-          switch (mode) {
-            case 'smooth':
-              _character = SingingCharacter.Smooth;
+          switch (leftClickMode) {
+            case 'Index':
+              _character1 = SingingCharacter.Index;
+              break;
+            case 'Ring':
+              _character1 = SingingCharacter.Ring;
               break;
             default:
-              _character = SingingCharacter.Raw;
+              _character1 = SingingCharacter.Middle;
+          }
+
+          switch (rightClickMode) {
+            case 'Index':
+              _character2 = SingingCharacter.Index;
+              break;
+            case 'Ring':
+              _character2 = SingingCharacter.Ring;
+              break;
+            default:
+              _character2 = SingingCharacter.Middle;
+          }
+
+          switch (doubleClickMode) {
+            case 'Index':
+              _character3 = SingingCharacter.Index;
+              break;
+            case 'Ring':
+              _character3 = SingingCharacter.Ring;
+              break;
+            default:
+              _character3 = SingingCharacter.Middle;
+          }
+
+          switch (scrollGestureMode) {
+            case 'IndexMiddle':
+              _character4 = ScrollGesture.IndexMiddle;
+              break;
+            case 'MiddleRing':
+              _character4 = ScrollGesture.MiddleRing;
+              break;
+            default:
+              _character4 = ScrollGesture.IndexRing;
           }
 
           isLoading = false;
@@ -114,39 +142,20 @@ class _CustomizationPage extends State<CustomizationPage> {
             : ListView(
                 children: [
                   _buildCard(
-                    title: "Sensitivity: ${_gestureSensitivityValue.round()}Hz",
-                    child: Slider(
-                      value: _gestureSensitivityValue,
-                      max: 100,
-                      divisions: 5,
-                      label: _gestureSensitivityValue.round().toString(),
-                      inactiveColor: Colors.grey.shade300,
-                      activeColor: Colors.blueAccent,
-                      thumbColor: Colors.blue,
-                      onChanged: (double value) {
-                        setState(() {
-                          _gestureSensitivityValue = value;
-                          spService.updateKeyValue('gestureSensitivity',
-                              _gestureSensitivityValue.toString());
-                        });
-                      },
-                    ),
-                  ),
-                  _buildCard(
-                    title: "Tracking Mode",
+                    title: "Left Click",
                     child: Column(
                       children: SingingCharacter.values
                           .map(
                             (character) => RadioListTile<SingingCharacter>(
                               title: Text(character.name),
                               value: character,
-                              groupValue: _character,
+                              groupValue: _character1,
                               activeColor: Colors.blueAccent,
                               onChanged: (SingingCharacter? value) {
                                 setState(() {
-                                  _character = value;
-                                  spService.updateKeyValue('trackingMode',
-                                      _character.toString().split('.').last);
+                                  _character1 = value;
+                                  spService.updateKeyValue('leftClick',
+                                      _character1.toString().split('.').last);
                                 });
                               },
                             ),
@@ -155,52 +164,86 @@ class _CustomizationPage extends State<CustomizationPage> {
                     ),
                   ),
                   _buildCard(
-                    title: "Pointer Speed: ${_pointerSpeedValue.round()}Hz",
+                    title: "Right Click",
+                    child: Column(
+                      children: SingingCharacter.values
+                          .map(
+                            (character) => RadioListTile<SingingCharacter>(
+                              title: Text(character.name),
+                              value: character,
+                              groupValue: _character2,
+                              activeColor: Colors.blueAccent,
+                              onChanged: (SingingCharacter? value) {
+                                setState(() {
+                                  _character2 = value;
+                                  spService.updateKeyValue('rightClick',
+                                      _character2.toString().split('.').last);
+                                });
+                              },
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                  _buildCard(
+                    title: "Double Click",
+                    child: Column(
+                      children: SingingCharacter.values
+                          .map(
+                            (character) => RadioListTile<SingingCharacter>(
+                              title: Text(character.name),
+                              value: character,
+                              groupValue: _character3,
+                              activeColor: Colors.blueAccent,
+                              onChanged: (SingingCharacter? value) {
+                                setState(() {
+                                  _character3 = value;
+                                  spService.updateKeyValue('doubleClick',
+                                      _character3.toString().split('.').last);
+                                });
+                              },
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                  _buildCard(
+                    title: "Scroll Gesture",
+                    child: Column(
+                      children: ScrollGesture.values
+                          .map(
+                            (character) => RadioListTile<ScrollGesture>(
+                              title: Text(character.name),
+                              value: character,
+                              groupValue: _character4,
+                              activeColor: Colors.blueAccent,
+                              onChanged: (ScrollGesture? value) {
+                                setState(() {
+                                  _character4 = value;
+                                  spService.updateKeyValue('scrollGesture',
+                                      _character4.toString().split('.').last);
+                                });
+                              },
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                  _buildCard(
+                    title: "Scroll Speed: ${_scrollSpeedValue.round()}Hz",
                     child: Slider(
-                      value: _pointerSpeedValue,
+                      value: _scrollSpeedValue,
                       max: 100,
                       divisions: 5,
-                      label: _pointerSpeedValue.round().toString(),
+                      label: _scrollSpeedValue.round().toString(),
                       inactiveColor: Colors.grey.shade300,
                       activeColor: Colors.blueAccent,
                       thumbColor: Colors.blue,
                       onChanged: (double value) {
                         setState(() {
-                          _pointerSpeedValue = value;
+                          _scrollSpeedValue = value;
                           spService.updateKeyValue(
-                              'pointerSpeed', _pointerSpeedValue.toString());
-                        });
-                      },
-                    ),
-                  ),
-                  _buildCard(
-                    title: "Vibration Feedback",
-                    child: SwitchListTile(
-                      title: const Text("Enable Vibration"),
-                      value: value1,
-                      activeColor: Colors.blueAccent,
-                      inactiveThumbColor: Colors.grey.shade400,
-                      onChanged: (bool value) {
-                        setState(() {
-                          value1 = value;
-                          spService.updateKeyValue(
-                              'vibrationFeedback', value1.toString());
-                        });
-                      },
-                    ),
-                  ),
-                  _buildCard(
-                    title: "Invert CursorMovement",
-                    child: SwitchListTile(
-                      title: const Text("Invert Movement"),
-                      value: value2,
-                      activeColor: Colors.blueAccent,
-                      inactiveThumbColor: Colors.grey.shade400,
-                      onChanged: (bool value) {
-                        setState(() {
-                          value2 = value;
-                          spService.updateKeyValue(
-                              'invertCursorMovement', value2.toString());
+                              'scrollSpeed', _scrollSpeedValue.toString());
                         });
                       },
                     ),

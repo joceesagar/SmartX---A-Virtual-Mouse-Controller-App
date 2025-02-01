@@ -86,7 +86,13 @@ class SpService {
     'invertCursorMovement': 'false',
     'pointerSpeed':
         '20.0', //Pointer Speed = Affects how fast the cursor moves based on that interpretation.
-    'primaryClick': 'Index', // Default primary click,
+
+    //Customization Page
+    'leftClick': 'Index', // Default left click,
+    'rightClick': 'Ring', // Default right click,
+    'doubleClick': 'Index', // Default double click,
+    'scrollGesture': 'IndexMiddle', // Default scroll gesture,
+    'scrollSpeed': '20.0', // Default scroll speed,
     'device_name': 'Default Device', // Default name for the device
   };
 
