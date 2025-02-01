@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/features/bottom_navigation/ui/Data/data_page.dart';
 import 'package:frontend/features/bottom_navigation/ui/Info/info_page.dart';
 import 'package:frontend/features/bottom_navigation/ui/Settings/setting_page.dart';
-import 'package:frontend/features/bottom_navigation/ui/Shortcuts/shortcut_page.dart';
+import 'package:frontend/features/bottom_navigation/ui/Customization/customization_page.dart';
 
 class HomePage extends StatefulWidget {
   static MaterialPageRoute route() => MaterialPageRoute(
@@ -25,9 +25,9 @@ class HomePageState extends State<HomePage> {
       'page': const SettingsPage(),
     },
     {
-      'icon': Icons.keyboard,
-      'label': 'Shortcuts',
-      'page': const ShortcutPage(),
+      'icon': Icons.back_hand_outlined,
+      'label': 'Customization',
+      'page': const CustomizationPage(),
     },
     {
       'icon': Icons.eco_rounded,

@@ -77,11 +77,17 @@ class SpService {
 
   // Default values to use if a key doesn't exist in SharedPreferences.
   final Map<String, String> defaultValues = {
-    'device_name': 'Default Device', // Default name for the device
-    'sliderValue': '20.0', // Default slider value
-    'mouseAcceleration': 'true', // Default mouse acceleration
-    'scrollDirection': 'Vertical', // Default scroll direction
+    //General Settings Page
+    'gestureSensitivity':
+        '20.0', // Gesture Sensitivity = Affects how movement is interpreted.
+    'vibrationFeedback': 'true', // Default mouse acceleration
+    'trackingMode':
+        'smooth', //  Select between different tracking styles, such as smooth tracking vs. raw tracking (instant response).
+    'invertCursorMovement': 'false',
+    'pointerSpeed':
+        '20.0', //Pointer Speed = Affects how fast the cursor moves based on that interpretation.
     'primaryClick': 'Index', // Default primary click,
+    'device_name': 'Default Device', // Default name for the device
   };
 
   /// Initialize default values in SharedPreferences if not already set.

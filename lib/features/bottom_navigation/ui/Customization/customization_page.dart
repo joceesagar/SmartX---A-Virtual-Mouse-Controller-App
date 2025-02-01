@@ -4,11 +4,11 @@ import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:frontend/core/services/sp_service.dart';
 import 'package:frontend/features/auth/cubit/ble_cubit.dart';
 
-class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+class CustomizationPage extends StatefulWidget {
+  const CustomizationPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  State<CustomizationPage> createState() => _CustomizationPage();
 }
 
 Future<String?> connectedDeviceId() async {
@@ -42,7 +42,7 @@ enum SingingCharacter {
 const List<String> list = <String>['One', 'Two', 'Three', 'Four'];
 typedef MenuEntry = DropdownMenuEntry<String>;
 
-class _SettingsPageState extends State<SettingsPage> {
+class _CustomizationPage extends State<CustomizationPage> {
   final spService = SpService();
 
   late double _gestureSensitivityValue;
@@ -102,7 +102,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "General Settings",
+          "Button & Finger Customization",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.blueAccent,
