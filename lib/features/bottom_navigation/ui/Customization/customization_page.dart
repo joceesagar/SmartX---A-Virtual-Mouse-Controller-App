@@ -23,11 +23,11 @@ final characteristic = QualifiedCharacteristic(
 );
 
 final List<String> keyList = [
-  'gestureSensitivity',
-  'mouseAcceleration',
-  'scrollDirection',
-  'primaryClick',
-  'pointerSpeed'
+  'leftClick',
+  'rightClick',
+  'doubleClick',
+  'scrollGesture',
+  'scrollSpeed'
 ];
 
 void writeToBle(BuildContext context) {

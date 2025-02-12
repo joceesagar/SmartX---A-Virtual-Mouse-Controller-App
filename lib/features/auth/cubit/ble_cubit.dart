@@ -240,42 +240,106 @@ class BleCubit extends Cubit<BleState> {
       deviceId: "48:27:E2:D3:13:DD");
 
   /// Subscribe to SharedPreferences changes and write updates to BLE
+  // Future<void> subscribeAndWrite(List<String> keys) async {
+  //   if (state is BleConnected) {
+  //     try {
+  //       // Step 1: Write default value initially
+  //       for (final key in keys) {
+  //         final initialValue = await SpService().getValue(key);
+  //         emit(BleWriting());
+  //         print('Initial values: $initialValue');
+  //         await _writeToBle(characteristic, initialValue, key);
+  //       }
+  //       emit(BleConnected("48:27:E2:D3:13:DD"));
+  //       // Step 2: Listen to SharedPreferences changes
+  //       SpService().onKeyChanged.listen((event) async {
+  //         final updatedKey = event.key;
+  //         final updatedValue = event.value;
+  //         print('Value Updated Successfully $updatedValue');
+
+  //         if (keys.contains(updatedKey)) {
+  //           await _writeToBle(characteristic, updatedValue, updatedKey);
+  //         }
+  //       });
+  //     } catch (e) {
+  //       emit(BleConnected("48:27:E2:D3:13:DD"));
+  //     }
+  //   } else {
+  //     Get.snackbar("NotConnected", "Bluetooth is not connected");
+  //   }
+  // }
+
+  // /// Write value to BLE characteristic
+  // Future<void> _writeToBle(
+  //     QualifiedCharacteristic characteristic, String value, String key) async {
+  //   print(ascii.encode(value));
+  //   try {
+  //     await _ble.writeCharacteristicWithResponse(
+  //       characteristic,
+  //       value: ascii.encode('$key: $value'),
+  //     );
+  //     print("WRITTEN SUCCESSFULLY");
+
+  //     emit(BleConnected("48:27:E2:D3:13:DD"));
+  //     Get.snackbar("Success", "Value Written successfully",
+  //         backgroundColor: Colors.green,
+  //         snackPosition: SnackPosition.BOTTOM,
+  //         margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10));
+  //   } catch (e) {
+  //     emit(BleConnected("48:27:E2:D3:13:DD"));
+  //     print(e);
+  //     Get.snackbar("Error", "Error writing value");
+  //   }
+  // }
+
   Future<void> subscribeAndWrite(List<String> keys) async {
     if (state is BleConnected) {
       try {
-        // Step 1: Write default value initially
+        // Step 1: Retrieve all key-value pairs and send them as JSON
+        final Map<String, String> keyValueMap = {};
+
         for (final key in keys) {
-          final initialValue = await SpService().getValue(key);
-          emit(BleWriting());
-          print('Initial values: $initialValue');
-          await _writeToBle(characteristic, initialValue, key);
+          final value = await SpService().getValue(key);
+          keyValueMap[key] = value;
         }
+
+        final jsonPayload = jsonEncode(keyValueMap);
+        emit(BleWriting());
+        print('Initial JSON Payload: $jsonPayload');
+
+        await _writeToBle(characteristic, jsonPayload);
+
+        emit(BleConnected("48:27:E2:D3:13:DD"));
+
         // Step 2: Listen to SharedPreferences changes
         SpService().onKeyChanged.listen((event) async {
           final updatedKey = event.key;
           final updatedValue = event.value;
-          print('Value Updated Successfully $updatedValue');
+
+          print('Value Updated Successfully: $updatedValue');
 
           if (keys.contains(updatedKey)) {
-            await _writeToBle(characteristic, updatedValue, updatedKey);
+            keyValueMap[updatedKey] = updatedValue;
+            final updatedJsonPayload = jsonEncode(keyValueMap);
+            await _writeToBle(characteristic, updatedJsonPayload);
           }
         });
       } catch (e) {
-        emit(BleWriteError("Error during subscription or writing: $e"));
+        emit(BleConnected("48:27:E2:D3:13:DD"));
       }
     } else {
       Get.snackbar("NotConnected", "Bluetooth is not connected");
     }
   }
 
-  /// Write value to BLE characteristic
+  /// Write JSON data to BLE characteristic
   Future<void> _writeToBle(
-      QualifiedCharacteristic characteristic, String value, String key) async {
-    print(ascii.encode(value));
+      QualifiedCharacteristic characteristic, String jsonPayload) async {
+    print(ascii.encode(jsonPayload));
     try {
-      await _ble.writeCharacteristicWithoutResponse(
+      await _ble.writeCharacteristicWithResponse(
         characteristic,
-        value: ascii.encode('$key: $value'),
+        value: ascii.encode(jsonPayload),
       );
       print("WRITTEN SUCCESSFULLY");
 
@@ -285,31 +349,43 @@ class BleCubit extends Cubit<BleState> {
           snackPosition: SnackPosition.BOTTOM,
           margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10));
     } catch (e) {
+      emit(BleConnected("48:27:E2:D3:13:DD"));
       print(e);
       Get.snackbar("Error", "Error writing value");
-      emit(BleConnected("48:27:E2:D3:13:DD"));
     }
   }
 
-  Stream<String> readFromBle(QualifiedCharacteristic characteristic) {
-    try {
-      return _ble.subscribeToCharacteristic(characteristic).map((data) {
-        final response = ascii.decode(data);
-        print("RECEIVED DATA: $response");
+  // Stream<String> readFromBle(QualifiedCharacteristic characteristic) {
+  //   try {
+  //     return _ble.subscribeToCharacteristic(characteristic).map((data) {
+  //       final response = ascii.decode(data);
+  //       print("RECEIVED DATA: $response");
 
-        emit(BleConnected("48:27:E2:D3:13:DD"));
-        Get.snackbar("Success", "Data Received: $response",
-            backgroundColor: Colors.blue,
-            snackPosition: SnackPosition.BOTTOM,
-            margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10));
+  //       emit(BleConnected("48:27:E2:D3:13:DD"));
+  //       Get.snackbar("Success", "Data Received: $response",
+  //           backgroundColor: Colors.blue,
+  //           snackPosition: SnackPosition.BOTTOM,
+  //           margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10));
 
-        return response; // Now correctly returning data from the stream
-      });
-    } catch (e) {
-      print("Reading Error: $e");
-      emit(BleConnected("48:27:E2:D3:13:DD"));
-      return const Stream.empty();
-    }
+  //       return response; // Now correctly returning data from the stream
+  //     });
+  //   } catch (e) {
+  //     print("Reading Error: $e");
+  //     emit(BleConnected("48:27:E2:D3:13:DD"));
+  //     return const Stream.empty();
+  //   }
+  // }
+
+  void readFromBle() {
+    print("BLE IS LISTENING.......");
+    _ble.subscribeToCharacteristic(characteristic).listen(
+      (data) {
+        print("Received Data: $data"); // Debugging: Print incoming data
+      },
+      onError: (dynamic error) {
+        print("Error: $error"); // Debugging: Print error if any
+      },
+    );
   }
 
   @override

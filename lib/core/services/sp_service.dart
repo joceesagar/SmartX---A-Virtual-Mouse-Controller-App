@@ -80,12 +80,9 @@ class SpService {
     //General Settings Page
     'gestureSensitivity':
         '20.0', // Gesture Sensitivity = Affects how movement is interpreted.
-    'vibrationFeedback': 'true', // Default mouse acceleration
-    'trackingMode':
-        'smooth', //  Select between different tracking styles, such as smooth tracking vs. raw tracking (instant response).
-    'invertCursorMovement': 'false',
-    'pointerSpeed':
-        '20.0', //Pointer Speed = Affects how fast the cursor moves based on that interpretation.
+    'hapticFeedback': 'true', // Default mouse acceleration
+    'hapticFeedbackMode':
+        'normal', //  Select between different tracking styles, such as smooth tracking vs. raw tracking (instant response).
 
     //Customization Page
     'leftClick': 'Index', // Default left click,

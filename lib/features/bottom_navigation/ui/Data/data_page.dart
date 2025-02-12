@@ -12,30 +12,35 @@ class VirtualHandScreen extends StatefulWidget {
 }
 
 class VirtualHandScreenState extends State<VirtualHandScreen> {
-  void startListeningToBle(QualifiedCharacteristic characteristic) {
-    context.read<BleCubit>().readFromBle(characteristic).listen((data) {
-      print("Received BLE Data: $data");
+  // void startListeningToBle(QualifiedCharacteristic characteristic) {
+  //   context.read<BleCubit>().readFromBle(characteristic).listen((data) {
+  //     print("Received BLE Data: $data");
 
-      // Check if the data is in the expected format: "x:1.2 y:2.3 z:3.4"
-      List<String> parts = data.split(' '); // Split by space
-      if (parts.length == 3) {
-        // Attempt to parse x, y, and z values
-        double newX = double.tryParse(parts[0].split(':')[1]) ?? 0.0;
-        double newY = double.tryParse(parts[1].split(':')[1]) ?? 0.0;
-        double newZ = double.tryParse(parts[2].split(':')[1]) ?? 0.0;
-        print("NewX: $newX");
-        print("NewY: $newY");
-        print("NewZ: $newZ");
+  //     // Check if the data is in the expected format: "x:1.2 y:2.3 z:3.4"
+  //     List<String> parts = data.split(' '); // Split by space
+  //     if (parts.length == 3) {
+  //       // Attempt to parse x, y, and z values
+  //       double newX = double.tryParse(parts[0].split(':')[1]) ?? 0.0;
+  //       double newY = double.tryParse(parts[1].split(':')[1]) ?? 0.0;
+  //       double newZ = double.tryParse(parts[2].split(':')[1]) ?? 0.0;
+  //       print("NewX: $newX");
+  //       print("NewY: $newY");
+  //       print("NewZ: $newZ");
 
-        // Update the hand's rotation with parsed values
-        updateHandPosition(newX, newY, newZ);
-      } else {
-        // Handle invalid format or data
-        print("Invalid data format received: $data");
-      }
-    }, onError: (error) {
-      print("BLE Read Error: $error");
-    });
+  //       // Update the hand's rotation with parsed values
+  //       updateHandPosition(newX, newY, newZ);
+  //     } else {
+  //       // Handle invalid format or data
+  //       print("Invalid data format received: $data");
+  //     }
+  //   }, onError: (error) {
+  //     print("BLE Read Error: $error");
+  //   });
+  // }
+
+  void startListeningToBle() {
+    print("Funtion has been Called waiting for data.....");
+    context.read<BleCubit>().readFromBle();
   }
 
   late Object hand;
@@ -50,13 +55,8 @@ class VirtualHandScreenState extends State<VirtualHandScreen> {
         4.0, 4.0, 4.0); // Increase the size of the hand by scaling it
 
     // Start listening to BLE
-    // final characteristic = QualifiedCharacteristic(
-    //   serviceId: serviceUuid,
-    //   characteristicId: characteristicUuid,
-    //   deviceId: foundDeviceId,
-    // );
 
-    // startListeningToBle(characteristic);
+    startListeningToBle();
   }
 
   void updateHandPosition(double newX, double newY, double newZ) {

@@ -24,9 +24,9 @@ final characteristic = QualifiedCharacteristic(
 
 final List<String> keyList = [
   'gestureSensitivity',
-  'mouseAcceleration',
-  'scrollDirection',
-  'primaryClick',
+  'vibrationFeedback',
+  'trackingMode',
+  'invertCursorMovement',
   'pointerSpeed'
 ];
 
@@ -35,15 +35,14 @@ void writeToBle(BuildContext context) {
 }
 
 enum SingingCharacter {
-  Smooth,
-  Raw,
+  Normal,
+  Strong,
 }
 
 class _SettingsPageState extends State<SettingsPage> {
   final spService = SpService();
 
   late double _gestureSensitivityValue;
-  late double _pointerSpeedValue;
   late SingingCharacter? _character;
   late bool value1;
   late bool value2;
@@ -63,27 +62,21 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _loadInitialValues() async {
     try {
       final sliderValue1 = await spService.getValue('gestureSensitivity');
-      final sliderValue2 = await spService.getValue('pointerSpeed');
-      final vibrationFeedback = await spService.getValue('vibrationFeedback');
-      final invertCursorMovement =
-          await spService.getValue('invertCursorMovement');
-      final mode = await spService.getValue('trackingMode');
-      // final primaryClick = await spService.getValue('primaryClick');
+      final hapticFeedback = await spService.getValue('hapticFeedback');
+      final mode = await spService.getValue('hapticFeedbackMode');
 
       if (mounted) {
         setState(() {
           _gestureSensitivityValue = double.parse(sliderValue1);
-          _pointerSpeedValue = double.parse(sliderValue2);
-          value1 = (vibrationFeedback.toLowerCase() ==
+          value1 = (hapticFeedback.toLowerCase() ==
               "true"); //returns true if default value is true otherwise false
-          value2 = (invertCursorMovement.toLowerCase() == "true");
 
           switch (mode) {
-            case 'smooth':
-              _character = SingingCharacter.Smooth;
+            case 'normal':
+              _character = SingingCharacter.Normal;
               break;
             default:
-              _character = SingingCharacter.Raw;
+              _character = SingingCharacter.Strong;
           }
 
           isLoading = false;
@@ -130,48 +123,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   _buildCard(
-                    title: "Tracking Mode",
-                    child: Column(
-                      children: SingingCharacter.values
-                          .map(
-                            (character) => RadioListTile<SingingCharacter>(
-                              title: Text(character.name),
-                              value: character,
-                              groupValue: _character,
-                              activeColor: Colors.blueAccent,
-                              onChanged: (SingingCharacter? value) {
-                                setState(() {
-                                  _character = value;
-                                  spService.updateKeyValue('trackingMode',
-                                      _character.toString().split('.').last);
-                                });
-                              },
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                  _buildCard(
-                    title: "Pointer Speed: ${_pointerSpeedValue.round()}Hz",
-                    child: Slider(
-                      value: _pointerSpeedValue,
-                      max: 100,
-                      divisions: 5,
-                      label: _pointerSpeedValue.round().toString(),
-                      inactiveColor: Colors.grey.shade300,
-                      activeColor: Colors.blueAccent,
-                      thumbColor: Colors.blue,
-                      onChanged: (double value) {
-                        setState(() {
-                          _pointerSpeedValue = value;
-                          spService.updateKeyValue(
-                              'pointerSpeed', _pointerSpeedValue.toString());
-                        });
-                      },
-                    ),
-                  ),
-                  _buildCard(
-                    title: "Vibration Feedback",
+                    title: "Haptic Feedback",
                     child: SwitchListTile(
                       title: const Text("Enable Vibration"),
                       value: value1,
@@ -181,25 +133,43 @@ class _SettingsPageState extends State<SettingsPage> {
                         setState(() {
                           value1 = value;
                           spService.updateKeyValue(
-                              'vibrationFeedback', value1.toString());
+                              'hapticFeedback', value1.toString());
                         });
                       },
                     ),
                   ),
                   _buildCard(
-                    title: "Invert CursorMovement",
-                    child: SwitchListTile(
-                      title: const Text("Invert Movement"),
-                      value: value2,
-                      activeColor: Colors.blueAccent,
-                      inactiveThumbColor: Colors.grey.shade400,
-                      onChanged: (bool value) {
-                        setState(() {
-                          value2 = value;
-                          spService.updateKeyValue(
-                              'invertCursorMovement', value2.toString());
-                        });
-                      },
+                    title: "Haptic Feedback Mode",
+                    child: IgnorePointer(
+                      ignoring: !value1, // disable card if switch is off
+                      child: Opacity(
+                        opacity: value1
+                            ? 1.0
+                            : 0.5, // Change opacity based on haptic switch value
+                        child: Column(
+                          children: SingingCharacter.values
+                              .map(
+                                (character) => RadioListTile<SingingCharacter>(
+                                  title: Text(character.name),
+                                  value: character,
+                                  groupValue: _character,
+                                  activeColor: Colors.blueAccent,
+                                  onChanged: (SingingCharacter? value) {
+                                    setState(() {
+                                      _character = value;
+                                      spService.updateKeyValue(
+                                          'hapticFeedbackMode',
+                                          _character
+                                              .toString()
+                                              .split('.')
+                                              .last);
+                                    });
+                                  },
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
