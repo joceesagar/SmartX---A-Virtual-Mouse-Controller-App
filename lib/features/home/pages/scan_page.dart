@@ -12,7 +12,7 @@ class ScanPage extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text(
-          "SmartX",
+          "MotionX",
           style: TextStyle(
               fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black),
         ),

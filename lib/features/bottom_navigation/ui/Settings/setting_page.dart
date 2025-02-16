@@ -22,15 +22,19 @@ final characteristic = QualifiedCharacteristic(
   characteristicId: Uuid.parse("7fb99b10-d067-42f2-99f4-b515e595c91c"),
 );
 
-final List<String> keyList = [
-  'gestureSensitivity',
-  'vibrationFeedback',
-  'trackingMode',
-  'invertCursorMovement',
-  'pointerSpeed'
-];
+void writeToBle(BuildContext context) async {
+  final HO = await SpService().getValue('HO');
 
-void writeToBle(BuildContext context) {
+  final List<String> keyList = [
+    'Type',
+    'SN',
+    'HO',
+  ];
+
+//for sending HF only when HO is true
+  if (HO.toLowerCase() == 'true') {
+    keyList.add('HM');
+  }
   context.read<BleCubit>().subscribeAndWrite(keyList);
 }
 
@@ -45,7 +49,6 @@ class _SettingsPageState extends State<SettingsPage> {
   late double _gestureSensitivityValue;
   late SingingCharacter? _character;
   late bool value1;
-  late bool value2;
   bool isLoading = true;
 
   Future<void> initializeDefaults() async {
@@ -61,9 +64,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _loadInitialValues() async {
     try {
-      final sliderValue1 = await spService.getValue('gestureSensitivity');
-      final hapticFeedback = await spService.getValue('hapticFeedback');
-      final mode = await spService.getValue('hapticFeedbackMode');
+      final sliderValue1 = await spService.getValue('SN');
+      final hapticFeedback = await spService.getValue('HO');
+      final mode = await spService.getValue('HM');
+      final type = await spService.getValue('Type');
+      if (type == 'G') {
+        spService.updateKeyValue('Type', 'N');
+      }
 
       if (mounted) {
         setState(() {
@@ -72,7 +79,7 @@ class _SettingsPageState extends State<SettingsPage> {
               "true"); //returns true if default value is true otherwise false
 
           switch (mode) {
-            case 'normal':
+            case '0':
               _character = SingingCharacter.Normal;
               break;
             default:
@@ -116,8 +123,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       onChanged: (double value) {
                         setState(() {
                           _gestureSensitivityValue = value;
-                          spService.updateKeyValue('gestureSensitivity',
-                              _gestureSensitivityValue.toString());
+                          spService.updateKeyValue(
+                              'SN', _gestureSensitivityValue.toString());
                         });
                       },
                     ),
@@ -132,8 +139,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       onChanged: (bool value) {
                         setState(() {
                           value1 = value;
-                          spService.updateKeyValue(
-                              'hapticFeedback', value1.toString());
+                          spService.updateKeyValue('HO', value1.toString());
                         });
                       },
                     ),
@@ -158,11 +164,14 @@ class _SettingsPageState extends State<SettingsPage> {
                                     setState(() {
                                       _character = value;
                                       spService.updateKeyValue(
-                                          'hapticFeedbackMode',
+                                          'HM',
                                           _character
-                                              .toString()
-                                              .split('.')
-                                              .last);
+                                                      .toString()
+                                                      .split('.')
+                                                      .last ==
+                                                  "Normal"
+                                              ? 0
+                                              : 1);
                                     });
                                   },
                                 ),

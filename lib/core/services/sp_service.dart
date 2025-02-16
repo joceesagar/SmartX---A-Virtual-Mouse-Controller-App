@@ -78,11 +78,11 @@ class SpService {
   // Default values to use if a key doesn't exist in SharedPreferences.
   final Map<String, String> defaultValues = {
     //General Settings Page
-    'gestureSensitivity':
-        '20.0', // Gesture Sensitivity = Affects how movement is interpreted.
-    'hapticFeedback': 'true', // Default mouse acceleration
-    'hapticFeedbackMode':
-        'normal', //  Select between different tracking styles, such as smooth tracking vs. raw tracking (instant response).
+    'Type': 'N', //type of data sensitivity
+    'SN': '20.0', // Gesture Sensitivity
+    'HO': 'true', // Haptic Output
+    'HM': //Haptic Mode
+        '0', //  Select between different tracking styles, such as smooth tracking vs. raw tracking (instant response).
 
     //Customization Page
     'leftClick': 'Index', // Default left click,

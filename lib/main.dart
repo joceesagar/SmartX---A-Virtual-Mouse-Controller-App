@@ -71,7 +71,7 @@ class _MyAppState extends State<MyApp> {
           ),
           useMaterial3: true,
         ),
-        home: const SettingsPage()
+        home: const ScanPage()
         // BlocBuilder<AuthCubit, AuthState>(
         //   builder: (context, state) {
         //     if (state is AuthLoggedIn || state is AuthGuest) {

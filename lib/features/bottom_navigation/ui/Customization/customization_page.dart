@@ -23,6 +23,7 @@ final characteristic = QualifiedCharacteristic(
 );
 
 final List<String> keyList = [
+  'Type',
   'leftClick',
   'rightClick',
   'doubleClick',
@@ -67,7 +68,10 @@ class _CustomizationPage extends State<CustomizationPage> {
       final rightClickMode = await spService.getValue('rightClick');
       final doubleClickMode = await spService.getValue('doubleClick');
       final scrollGestureMode = await spService.getValue('scrollGesture');
-      // final primaryClick = await spService.getValue('primaryClick');
+      final type = await spService.getValue('Type');
+      if (type == 'N') {
+        spService.updateKeyValue('Type', 'G');
+      }
 
       if (mounted) {
         setState(() {
