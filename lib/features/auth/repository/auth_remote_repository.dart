@@ -37,6 +37,7 @@ class AuthRemoteRepository {
       final user = UserModels.fromJson(res.body);
       return user;
     } catch (e) {
+      print("Error:$e");
       throw e.toString();
     }
   }

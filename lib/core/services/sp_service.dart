@@ -79,7 +79,7 @@ class SpService {
   final Map<String, String> defaultValues = {
     //General Settings Page
     'Type': 'N', //type of data sensitivity
-    'SN': '20.0', // Gesture Sensitivity
+    'SN': '70', // Gesture Sensitivity
     'HO': 'true', // Haptic Output
     'HM': //Haptic Mode
         '0', //  Select between different tracking styles, such as smooth tracking vs. raw tracking (instant response).

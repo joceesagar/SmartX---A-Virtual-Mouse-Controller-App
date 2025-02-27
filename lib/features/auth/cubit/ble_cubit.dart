@@ -237,7 +237,7 @@ class BleCubit extends Cubit<BleState> {
   final characteristic = QualifiedCharacteristic(
       serviceId: Uuid.parse("785e99cc-e61f-41b0-899e-f59fa295441a"),
       characteristicId: Uuid.parse("7fb99d10-d067-42f2-99f4-b515e595c91c"),
-      deviceId: "48:27:E2:D3:13:DD");
+      deviceId: "48:27:E2:D3:14:01");
 
   /// Subscribe to SharedPreferences changes and write updates to BLE
   // Future<void> subscribeAndWrite(List<String> keys) async {
@@ -309,7 +309,7 @@ class BleCubit extends Cubit<BleState> {
 
         await _writeToBle(characteristic, jsonPayload);
 
-        emit(BleConnected("48:27:E2:D3:13:DD"));
+        emit(BleConnected("48:27:E2:D3:14:01"));
 
         // Step 2: Listen to SharedPreferences changes
         SpService().onKeyChanged.listen((event) async {
@@ -322,10 +322,11 @@ class BleCubit extends Cubit<BleState> {
             keyValueMap[updatedKey] = updatedValue;
             final updatedJsonPayload = jsonEncode(keyValueMap);
             await _writeToBle(characteristic, updatedJsonPayload);
+            emit(BleConnected("48:27:E2:D3:14:01"));
           }
         });
       } catch (e) {
-        emit(BleConnected("48:27:E2:D3:13:DD"));
+        emit(BleConnected("48:27:E2:D3:14:01"));
       }
     } else {
       Get.snackbar("NotConnected", "Bluetooth is not connected");
@@ -343,13 +344,13 @@ class BleCubit extends Cubit<BleState> {
       );
       print("WRITTEN SUCCESSFULLY");
 
-      emit(BleConnected("48:27:E2:D3:13:DD"));
+      emit(BleConnected("48:27:E2:D3:14:01"));
       Get.snackbar("Success", "Value Written successfully",
           backgroundColor: Colors.green,
           snackPosition: SnackPosition.BOTTOM,
           margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10));
     } catch (e) {
-      emit(BleConnected("48:27:E2:D3:13:DD"));
+      emit(BleConnected("48:27:E2:D3:14:01"));
       print(e);
       Get.snackbar("Error", "Error writing value");
     }
@@ -376,11 +377,13 @@ class BleCubit extends Cubit<BleState> {
   //   }
   // }
 
-  void readFromBle() {
+  void readFromBle() async {
     print("BLE IS LISTENING.......");
-    _ble.subscribeToCharacteristic(characteristic).listen(
+    await _ble.subscribeToCharacteristic(characteristic).listen(
       (data) {
-        print("Received Data: $data"); // Debugging: Print incoming data
+        print("Received Data: $data"); // Raw data in list format
+        print(
+            "Received Decoded Data: ${String.fromCharCodes(data)}"); // Convert to ASCII string
       },
       onError: (dynamic error) {
         print("Error: $error"); // Debugging: Print error if any

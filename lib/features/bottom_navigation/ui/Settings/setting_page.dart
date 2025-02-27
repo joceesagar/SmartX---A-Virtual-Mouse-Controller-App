@@ -22,19 +22,8 @@ final characteristic = QualifiedCharacteristic(
   characteristicId: Uuid.parse("7fb99b10-d067-42f2-99f4-b515e595c91c"),
 );
 
+final List<String> keyList = ['Type', 'SN', 'HO', 'HM'];
 void writeToBle(BuildContext context) async {
-  final HO = await SpService().getValue('HO');
-
-  final List<String> keyList = [
-    'Type',
-    'SN',
-    'HO',
-  ];
-
-//for sending HF only when HO is true
-  if (HO.toLowerCase() == 'true') {
-    keyList.add('HM');
-  }
   context.read<BleCubit>().subscribeAndWrite(keyList);
 }
 
@@ -46,7 +35,7 @@ enum SingingCharacter {
 class _SettingsPageState extends State<SettingsPage> {
   final spService = SpService();
 
-  late double _gestureSensitivityValue;
+  late int _gestureSensitivityValue;
   late SingingCharacter? _character;
   late bool value1;
   bool isLoading = true;
@@ -74,7 +63,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
       if (mounted) {
         setState(() {
-          _gestureSensitivityValue = double.parse(sliderValue1);
+          _gestureSensitivityValue = int.parse(sliderValue1);
           value1 = (hapticFeedback.toLowerCase() ==
               "true"); //returns true if default value is true otherwise false
 
@@ -113,16 +102,19 @@ class _SettingsPageState extends State<SettingsPage> {
                   _buildCard(
                     title: "Sensitivity: ${_gestureSensitivityValue.round()}Hz",
                     child: Slider(
-                      value: _gestureSensitivityValue,
+                      value: _gestureSensitivityValue
+                          .toDouble(), // Convert int to double
                       max: 100,
-                      divisions: 5,
+                      min: 30,
+                      divisions: 8,
                       label: _gestureSensitivityValue.round().toString(),
                       inactiveColor: Colors.grey.shade300,
                       activeColor: Colors.blueAccent,
                       thumbColor: Colors.blue,
                       onChanged: (double value) {
                         setState(() {
-                          _gestureSensitivityValue = value;
+                          _gestureSensitivityValue =
+                              value.toInt(); // Convert double to int
                           spService.updateKeyValue(
                               'SN', _gestureSensitivityValue.toString());
                         });

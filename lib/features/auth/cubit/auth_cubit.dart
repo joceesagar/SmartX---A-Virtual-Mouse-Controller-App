@@ -50,6 +50,7 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(AuthSignUp());
     } catch (e) {
+      print("Error occurred");
       emit(AuthError(e.toString()));
     }
   }
