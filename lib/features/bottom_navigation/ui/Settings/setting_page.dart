@@ -91,30 +91,32 @@ class _SettingsPageState extends State<SettingsPage> {
           "General Settings",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.grey[850],
+        surfaceTintColor: Colors.grey[850],
+        elevation: 20,
       ),
+      backgroundColor: Colors.grey[900], // Lighter black background
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(
+                child: CircularProgressIndicator(color: Colors.white))
             : ListView(
                 children: [
                   _buildCard(
                     title: "Sensitivity: ${_gestureSensitivityValue.round()}Hz",
                     child: Slider(
-                      value: _gestureSensitivityValue
-                          .toDouble(), // Convert int to double
+                      value: _gestureSensitivityValue.toDouble(),
                       max: 100,
                       min: 30,
                       divisions: 8,
                       label: _gestureSensitivityValue.round().toString(),
-                      inactiveColor: Colors.grey.shade300,
+                      inactiveColor: Colors.grey.shade700,
                       activeColor: Colors.blueAccent,
                       thumbColor: Colors.blue,
                       onChanged: (double value) {
                         setState(() {
-                          _gestureSensitivityValue =
-                              value.toInt(); // Convert double to int
+                          _gestureSensitivityValue = value.toInt();
                           spService.updateKeyValue(
                               'SN', _gestureSensitivityValue.toString());
                         });
@@ -124,10 +126,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   _buildCard(
                     title: "Haptic Feedback",
                     child: SwitchListTile(
-                      title: const Text("Enable Vibration"),
+                      title: const Text("Enable Vibration",
+                          style: TextStyle(color: Colors.white)),
                       value: value1,
                       activeColor: Colors.blueAccent,
-                      inactiveThumbColor: Colors.grey.shade400,
+                      inactiveThumbColor: Colors.grey.shade600,
                       onChanged: (bool value) {
                         setState(() {
                           value1 = value;
@@ -139,16 +142,16 @@ class _SettingsPageState extends State<SettingsPage> {
                   _buildCard(
                     title: "Haptic Feedback Mode",
                     child: IgnorePointer(
-                      ignoring: !value1, // disable card if switch is off
+                      ignoring: !value1,
                       child: Opacity(
-                        opacity: value1
-                            ? 1.0
-                            : 0.5, // Change opacity based on haptic switch value
+                        opacity: value1 ? 1.0 : 0.5,
                         child: Column(
                           children: SingingCharacter.values
                               .map(
                                 (character) => RadioListTile<SingingCharacter>(
-                                  title: Text(character.name),
+                                  title: Text(character.name,
+                                      style:
+                                          const TextStyle(color: Colors.white)),
                                   value: character,
                                   groupValue: _character,
                                   activeColor: Colors.blueAccent,
@@ -180,9 +183,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: ElevatedButton(
                       onPressed: () => writeToBle(context),
                       style: ElevatedButton.styleFrom(
+                        elevation: 20,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16)),
-                        backgroundColor: Colors.green,
+                        backgroundColor: Colors.grey[850],
                       ),
                       child: const Text(
                         "Apply Changes",
@@ -202,7 +206,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildCard({required String title, required Widget child}) {
     return Card(
-      elevation: 3,
+      elevation: 20, // Strong elevation
+      shadowColor: Colors.black, // Shadow
+      color: Colors.grey[850], // Black card
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
@@ -211,8 +217,10 @@ class _SettingsPageState extends State<SettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(title,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.white)),
             const SizedBox(height: 10),
             child,
           ],

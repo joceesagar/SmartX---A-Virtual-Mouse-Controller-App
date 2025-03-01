@@ -26,6 +26,7 @@ class AuthCubit extends Cubit<AuthState> {
       }
       // Check if user is logged in with id and password
       final userModel = await authRemoteRepository.getUserData();
+      print("USERMODEL: $userModel");
       if (userModel != null) {
         emit(AuthLoggedIn(userModel));
       } else {
@@ -110,7 +111,7 @@ class AuthCubit extends Cubit<AuthState> {
       prefs.clearConnectedDeviceId(); // Remove connection state
       _ble.deinitialize(); // Deinitialize BLE service
 
-      Get.off(() => const SignupPage()); // Navigate to signup page
+      Get.offAll(() => const SignupPage()); // Navigate to signup page
     } catch (e) {
       emit(AuthError('Failed to log out: ${e.toString()}'));
     }

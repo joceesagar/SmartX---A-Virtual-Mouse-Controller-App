@@ -21,12 +21,15 @@ class InfoPage extends StatelessWidget {
         }
       },
       child: Scaffold(
+        backgroundColor: Colors.grey[900],
         appBar: AppBar(
           title: const Text(
             "Device Info",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
-          backgroundColor: Colors.blueAccent,
+          backgroundColor: Colors.grey[850],
+          surfaceTintColor: Colors.grey[850],
+          elevation: 20,
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
@@ -38,12 +41,12 @@ class InfoPage extends StatelessWidget {
               _buildInfoSection("MAC Address", "00:1A:7D:DA:71:13"),
               _buildInfoSection("User Name", "John Doe"),
               _buildInfoSection("User ID", "9876543210"),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               _buildActionButton("Disconnect", Colors.red, () {
                 // Add Disconnect functionality here
                 context.read<BleCubit>().disconnectDevice();
               }),
-              const SizedBox(height: 20),
+              const SizedBox(height: 5),
               _buildActionButton("Logout", Colors.red, () {
                 // Add Logout functionality here
                 context.read<AuthCubit>().logout();
@@ -56,22 +59,33 @@ class InfoPage extends StatelessWidget {
   }
 
   Widget _buildInfoSection(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-                color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+    return SingleChildScrollView(
+      child: Card(
+        color: Colors.grey[850],
+        elevation: 20,
+        child: SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  value,
+                  style: const TextStyle(color: Colors.white60, fontSize: 16),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: const TextStyle(color: Colors.black54, fontSize: 16),
-          ),
-        ],
+        ),
       ),
     );
   }

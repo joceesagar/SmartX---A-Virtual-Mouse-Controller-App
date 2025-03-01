@@ -3,6 +3,7 @@ import 'package:frontend/features/bottom_navigation/ui/Data/data_page.dart';
 import 'package:frontend/features/bottom_navigation/ui/Info/info_page.dart';
 import 'package:frontend/features/bottom_navigation/ui/Settings/setting_page.dart';
 import 'package:frontend/features/bottom_navigation/ui/Customization/customization_page.dart';
+import 'package:frontend/features/bottom_navigation/ui/UserGuide/user_guide.dart';
 
 class HomePage extends StatefulWidget {
   static MaterialPageRoute route() => MaterialPageRoute(
@@ -25,9 +26,10 @@ class HomePageState extends State<HomePage> {
       'page': const SettingsPage(),
     },
     {
-      'icon': Icons.back_hand_outlined,
+      'icon': Icons.lightbulb_outline,
       'label': 'Customization',
-      'page': const CustomizationPage(),
+      // 'page': const CustomizationPage(),
+      'page': GestureManualWidget(),
     },
     {
       'icon': Icons.tv,
@@ -57,14 +59,14 @@ class HomePageState extends State<HomePage> {
         items: _tabs
             .map(
               (tab) => BottomNavigationBarItem(
-                icon: Icon(tab['icon']),
-                label: tab['label'],
-              ),
+                  icon: Icon(tab['icon']),
+                  label: tab['label'],
+                  backgroundColor: Colors.grey[850]),
             )
             .toList(), // Generate items dynamically based on the tabs data
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
-        unselectedItemColor: Colors.black,
+        unselectedItemColor: Colors.white,
         onTap: _onItemTapped, // Update selected tab on tap
       ),
     );

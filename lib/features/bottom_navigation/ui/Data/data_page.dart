@@ -63,19 +63,22 @@ class VirtualHandScreenState extends State<VirtualHandScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[850],
       appBar: AppBar(
         title: const Text(
           "Virtual Hand Tracker",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.grey[850],
+        surfaceTintColor: Colors.grey[850],
+        elevation: 20,
       ),
       body: Column(
         children: [
           Expanded(
             flex: 2,
             child: Container(
-              color: Colors.blueGrey, // Set the background color for the scene
+              color: Colors.grey[900], // Set the background color for the scene
               child: Cube(
                 onSceneCreated: (Scene scene) {
                   scene.world.add(hand);
@@ -86,27 +89,30 @@ class VirtualHandScreenState extends State<VirtualHandScreen> {
           ),
           Expanded(
             child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  buildSlider("X Position", x, -5, 5, (value) {
-                    updateHandPosition(value, y, z);
-                  }),
-                  buildSlider("Y Position", y, -5, 5, (value) {
-                    updateHandPosition(x, value, z);
-                  }),
-                  buildSlider("Z Position", z, -5, 5, (value) {
-                    updateHandPosition(x, y, value);
-                  }),
-                  buildSlider("Rotation X", rotationX, -180, 180, (value) {
-                    updateHandRotation(value, rotationY, rotationZ);
-                  }),
-                  buildSlider("Rotation Y", rotationY, -180, 180, (value) {
-                    updateHandRotation(rotationX, value, rotationZ);
-                  }),
-                  buildSlider("Rotation Z", rotationZ, -180, 180, (value) {
-                    updateHandRotation(rotationX, rotationY, value);
-                  }),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Column(
+                  children: [
+                    buildSlider("X Position", x, -5, 5, (value) {
+                      updateHandPosition(value, y, z);
+                    }),
+                    buildSlider("Y Position", y, -5, 5, (value) {
+                      updateHandPosition(x, value, z);
+                    }),
+                    buildSlider("Z Position", z, -5, 5, (value) {
+                      updateHandPosition(x, y, value);
+                    }),
+                    buildSlider("Rotation X", rotationX, -180, 180, (value) {
+                      updateHandRotation(value, rotationY, rotationZ);
+                    }),
+                    buildSlider("Rotation Y", rotationY, -180, 180, (value) {
+                      updateHandRotation(rotationX, value, rotationZ);
+                    }),
+                    buildSlider("Rotation Z", rotationZ, -180, 180, (value) {
+                      updateHandRotation(rotationX, rotationY, value);
+                    }),
+                  ],
+                ),
               ),
             ),
           ),
@@ -119,13 +125,19 @@ class VirtualHandScreenState extends State<VirtualHandScreen> {
       ValueChanged<double> onChanged) {
     return Column(
       children: [
-        Text(label),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white),
+        ),
         Slider(
           value: value,
           min: min,
           max: max,
           divisions: 20,
           label: value.toStringAsFixed(2),
+          inactiveColor: Colors.grey.shade700,
+          activeColor: Colors.blueAccent,
+          thumbColor: Colors.blue,
           onChanged: onChanged,
         ),
       ],
