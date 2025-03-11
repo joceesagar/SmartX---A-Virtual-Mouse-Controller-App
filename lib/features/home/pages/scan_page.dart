@@ -14,12 +14,14 @@ class ScanPage extends StatelessWidget {
         title: const Text(
           "MotionX",
           style: TextStyle(
-              fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black),
+              fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey[850],
+        surfaceTintColor: Colors.grey[850],
         elevation: 20,
         toolbarHeight: 65,
       ),
+      backgroundColor: Colors.grey[900],
       body: Column(
         children: [
           Padding(
@@ -31,8 +33,10 @@ class ScanPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   const Text("Status: ",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
                   BlocBuilder<BleCubit, BleState>(
                     builder: (context, state) {
                       if (state is BleConnected) {
@@ -91,24 +95,30 @@ class ScanPage extends StatelessWidget {
             },
             builder: (context, state) {
               if (state is BleScanning) {
-                return const Expanded(
-                    child: Center(
+                return const Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Center(child: CircularProgressIndicator()),
+                      SizedBox(
+                        height: 250,
+                      ),
+                      Center(
+                          child: CircularProgressIndicator(
+                        color: Colors.white,
+                      )),
                       SizedBox(
                         height: 10,
                       ),
                       Text("Scanning...",
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
                     ],
                   ),
-                ));
+                );
               }
-              return Expanded(
-                flex: 1,
+              return Flexible(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -117,9 +127,13 @@ class ScanPage extends StatelessWidget {
                         SizedBox(
                           width: 350,
                           child: ElevatedButton(
-                              style: const ButtonStyle(
-                                  backgroundColor:
-                                      WidgetStatePropertyAll(Colors.black)),
+                              style: ButtonStyle(
+                                  backgroundColor: WidgetStatePropertyAll(
+                                    Colors.grey[850],
+                                  ),
+                                  elevation: const WidgetStatePropertyAll(30),
+                                  shadowColor: const WidgetStatePropertyAll(
+                                      Colors.black)),
                               onPressed: () async {
                                 // Trigger the scanning process
                                 context.read<BleCubit>().startScan();
@@ -141,9 +155,9 @@ class ScanPage extends StatelessWidget {
                         const Text(
                           "Please click here to scan for devices",
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14, // Optional: adjust the font size
-                          ),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14, // Optional: adjust the font size
+                              color: Colors.white),
                         ),
                       ],
                     )

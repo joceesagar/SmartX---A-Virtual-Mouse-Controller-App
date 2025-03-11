@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:frontend/core/services/sp_service.dart';
+import 'package:frontend/app_navigator.dart';
 import 'package:frontend/features/auth/cubit/auth_cubit.dart';
 import 'package:frontend/features/auth/cubit/ble_cubit.dart';
-import 'package:frontend/features/auth/pages/signup_page.dart';
 import 'package:frontend/features/auth/repository/data_remote_repository.dart';
-import 'package:frontend/features/home/pages/home_page.dart';
-import 'package:frontend/features/home/pages/scan_page.dart';
 import 'package:get/get.dart';
 
 void main() {
   runApp(MultiBlocProvider(
     providers: [
-      BlocProvider(create: (_) => AuthCubit()),
-      BlocProvider(create: (_) => BleCubit())
+      BlocProvider(
+        create: (_) => AuthCubit(),
+        lazy: false,
+      ),
+      BlocProvider(
+        create: (_) => BleCubit(),
+        lazy: false,
+      ),
     ],
-    child: const GetMaterialApp(home: MyApp()),
+    child: const GetMaterialApp(
+      home: MyApp(),
+    ),
   ));
 }
 
@@ -28,6 +33,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _initialsLoaded = false;
+
   @override
   void initState() {
     super.initState();
@@ -48,9 +54,10 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Task App',
         theme: ThemeData(
-          scaffoldBackgroundColor: Colors.black,
+          scaffoldBackgroundColor: Colors.grey[900],
           inputDecorationTheme: InputDecorationTheme(
             contentPadding: const EdgeInsets.all(27),
             enabledBorder: OutlineInputBorder(
@@ -84,25 +91,6 @@ class _MyAppState extends State<MyApp> {
           ),
           useMaterial3: true,
         ),
-        home: const HomePage()
-        // BlocBuilder<AuthCubit, AuthState>(
-        //   builder: (context, state) {
-        //     if (state is AuthLoggedIn) {
-        //       WidgetsBinding.instance.addPostFrameCallback((_) {
-        //         loadInitials();
-        //       });
-        //       print("IsAuthGuest: ${SpService().isGuestLoggedIn()}");
-        //       print(state);
-        //       return const ScanPage();
-        //     } else if (state is AuthGuest) {
-        //       print("AuthGuest: ${SpService().getGuestId()}");
-        //       print(state);
-        //       return const ScanPage();
-        //     } else {
-        //       return const SignupPage();
-        //     }
-        //   },
-        // ),
-        );
+        home: const AppNavigator());
   }
 }

@@ -35,13 +35,14 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   http: ^1.2.2
-  flutter_bloc: ^8.1.6
+  flutter_bloc: ^9.1.0
   shared_preferences: ^2.3.5
   get: ^4.6.6
   flutter_reactive_ble: ^5.4.0
   permission_handler: ^11.3.1
   flutter_cube: ^0.1.1
   flutter_dotenv: ^5.2.1
+  equatable: ^2.0.7
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +69,10 @@ flutter:
   assets:
     - assets/hand.obj
     - assets/gifs/left_swipe.gif
+    - assets/gifs/right_swipe.gif
+    - assets/gifs/scroll.gif
+    - assets/gifs/left_click.gif
+    - assets/gifs/right_click.gif
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

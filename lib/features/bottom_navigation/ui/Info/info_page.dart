@@ -9,50 +9,38 @@ class InfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthCubit, AuthState>(
-      listener: (context, state) {
-        if (state is AuthInitial) {
-          // Navigate to SignupPage and clear stack
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const SignupPage()),
-            (route) => false, // Remove all previous routes
-          );
-        }
-      },
-      child: Scaffold(
-        backgroundColor: Colors.grey[900],
-        appBar: AppBar(
-          title: const Text(
-            "Device Info",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.grey[850],
-          surfaceTintColor: Colors.grey[850],
-          elevation: 20,
+    return Scaffold(
+      backgroundColor: Colors.grey[900],
+      appBar: AppBar(
+        title: const Text(
+          "Device Info",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildInfoSection("Device Name", "My Awesome Device"),
-              _buildInfoSection("Device ID", "1234567890"),
-              _buildInfoSection("MAC Address", "00:1A:7D:DA:71:13"),
-              _buildInfoSection("User Name", "John Doe"),
-              _buildInfoSection("User ID", "9876543210"),
-              const SizedBox(height: 20),
-              _buildActionButton("Disconnect", Colors.red, () {
-                // Add Disconnect functionality here
-                context.read<BleCubit>().disconnectDevice();
-              }),
-              const SizedBox(height: 5),
-              _buildActionButton("Logout", Colors.red, () {
-                // Add Logout functionality here
-                context.read<AuthCubit>().logout();
-              }),
-            ],
-          ),
+        backgroundColor: Colors.grey[850],
+        surfaceTintColor: Colors.grey[850],
+        elevation: 20,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildInfoSection("Device Name", "MotionX"),
+            _buildInfoSection("Device ID", "48:27:E2:D3:13:DD"),
+            _buildInfoSection("MAC Address", "00:1A:7D:DA:71:13"),
+            _buildInfoSection("User Name", "Guest ID"),
+            _buildInfoSection("User ID", "9876543210"),
+            const SizedBox(height: 20),
+            _buildActionButton("Disconnect", Colors.red, () {
+              // Add Disconnect functionality here
+              context.read<BleCubit>().disconnectDevice();
+            }),
+            const SizedBox(height: 5),
+            _buildActionButton("Logout", Colors.red, () {
+              // Add Logout functionality here
+              context.read<AuthCubit>().logout(context.read<BleCubit>());
+            }),
+          ],
         ),
       ),
     );

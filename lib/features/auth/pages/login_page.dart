@@ -40,123 +40,165 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: BlocConsumer<AuthCubit, AuthState>(
-      listener: (context, state) {
-        if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
+    return Theme(
+        data: ThemeData(
+          scaffoldBackgroundColor: Colors.grey[900],
+          inputDecorationTheme: InputDecorationTheme(
+            contentPadding: const EdgeInsets.all(27),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.grey.shade300,
+                width: 3,
+              ),
+              borderRadius: BorderRadius.circular(10),
             ),
-          );
-        } else if (state is AuthLoggedIn) {
-          Navigator.pushAndRemoveUntil(context, HomePage.route(), (_) => false);
-        }
-      },
-      builder: (context, state) {
-        if (state is AuthLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        return Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Log In",
-                  style: TextStyle(
-                    fontSize: 50,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-                TextFormField(
-                  controller: emailController,
-                  decoration: const InputDecoration(
-                    hintText: "Email",
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Email field cannot be empty";
-                    }
-                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                      return "Please enter a valid email address";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                TextFormField(
-                  controller: passwordController,
-                  decoration: const InputDecoration(
-                    hintText: "Password",
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Password field cannot be empty";
-                    }
-                    if (value.length < 8) {
-                      return "Password must be at least 8 characters long";
-                    }
-                    if (!RegExp(r'[A-Z]').hasMatch(value)) {
-                      return "Password must contain at least one uppercase letter";
-                    }
-                    if (!RegExp(r'[a-z]').hasMatch(value)) {
-                      return "Password must contain at least one lowercase letter";
-                    }
-                    if (!RegExp(r'[0-9]').hasMatch(value)) {
-                      return "Password must contain at least one digit";
-                    }
-                    if (!RegExp(r'[!@#\$&*~]').hasMatch(value)) {
-                      return "Password must contain at least one special character (!@#\$&*~)";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                ElevatedButton(
-                  onPressed: loginUser,
-                  child: const Text(
-                    "LOGIN",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(SignupPage.route());
-                  },
-                  child: RichText(
-                    text: TextSpan(
-                      text: "Don't have an account? ",
-                      style: Theme.of(context).textTheme.titleMedium,
-                      children: const [
-                        TextSpan(
-                          text: "Sign Up",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )
-                      ],
-                    ),
-                  ),
-                )
-              ],
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(width: 3),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            border: OutlineInputBorder(
+              borderSide: const BorderSide(width: 3),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.red, width: 3),
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
-        );
-      },
-    ));
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              minimumSize: const Size(60, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+            ),
+          ),
+          useMaterial3: true,
+        ),
+        child: Scaffold(
+            body: BlocConsumer<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state is AuthError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            } else if (state is AuthLoggedIn) {
+              Navigator.pushAndRemoveUntil(
+                  context, HomePage.route(), (_) => false);
+            }
+          },
+          builder: (context, state) {
+            if (state is AuthLoading) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            return Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "Log In",
+                      style: TextStyle(
+                          fontSize: 50,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    TextFormField(
+                      controller: emailController,
+                      decoration: const InputDecoration(
+                          hintText: "Email",
+                          hintStyle: TextStyle(color: Colors.white)),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return "Email field cannot be empty";
+                        }
+                        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                          return "Please enter a valid email address";
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    TextFormField(
+                      controller: passwordController,
+                      decoration: const InputDecoration(
+                          hintText: "Password",
+                          hintStyle: TextStyle(color: Colors.white)),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return "Password field cannot be empty";
+                        }
+                        if (value.length < 8) {
+                          return "Password must be at least 8 characters long";
+                        }
+                        if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                          return "Password must contain at least one uppercase letter";
+                        }
+                        if (!RegExp(r'[a-z]').hasMatch(value)) {
+                          return "Password must contain at least one lowercase letter";
+                        }
+                        if (!RegExp(r'[0-9]').hasMatch(value)) {
+                          return "Password must contain at least one digit";
+                        }
+                        if (!RegExp(r'[!@#\$&*~]').hasMatch(value)) {
+                          return "Password must contain at least one special character (!@#\$&*~)";
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    ElevatedButton(
+                      style: const ButtonStyle(
+                          backgroundColor:
+                              WidgetStatePropertyAll(Colors.white)),
+                      onPressed: loginUser,
+                      child: const Text(
+                        "LOGIN",
+                        style: TextStyle(color: Colors.black, fontSize: 16),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(SignupPage.route());
+                      },
+                      child: RichText(
+                        text: const TextSpan(
+                          text: "Don't have an account? ",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: "Sign Up",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        )));
   }
 }

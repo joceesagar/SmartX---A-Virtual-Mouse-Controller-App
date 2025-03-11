@@ -1,8 +1,13 @@
 import 'dart:math';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:frontend/core/services/sp_service.dart';
+import 'package:frontend/features/auth/cubit/ble_cubit.dart';
+import 'package:frontend/features/auth/pages/login_page.dart';
 import 'package:frontend/features/auth/pages/signup_page.dart';
+
 import 'package:frontend/features/auth/repository/auth_remote_repository.dart';
 import 'package:frontend/models/user_models.dart';
 import 'package:get/get.dart';
@@ -95,24 +100,33 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   /// Handles logout
-  Future<void> logout() async {
+  Future<void> logout(BleCubit bleCubit) async {
     try {
-      emit(AuthLoading()); // Emit loading state
+      emit(AuthLoading()); // Indicate that logout is in progress
 
-      // Handle AuthLoggedIn or AuthGuest-specific logic
+      final prefs = SpService();
+
+      // Clear authentication state
       if (state is AuthLoggedIn) {
-        await spService.removeToken();
+        await prefs.removeToken(); // Clear token for logged-in users
       } else if (state is AuthGuest) {
-        await spService.guestLogout();
+        await prefs.guestLogout(); // Clear guest session
       }
 
-      // Clear connected device and deinitialize BLE
-      final prefs = SpService();
-      prefs.clearConnectedDeviceId(); // Remove connection state
-      _ble.deinitialize(); // Deinitialize BLE service
+      // Clear BLE connection state
+      await prefs.clearConnectedDeviceId();
+      await _ble.deinitialize();
 
-      Get.offAll(() => const SignupPage()); // Navigate to signup page
+      // Update BleCubit state
+      bleCubit.disconnectDevice(); //Or emit a disconnected state directly.
+
+      // Emit initial state after all operations
+      emit(AuthInitial());
+      print("AuthInitial emitted"); // Debug print
+      print("Current state: ${state.runtimeType}");
+      // Ensure navigation happens after UI updates
     } catch (e) {
+      print('Logout Error: ${e.toString()}'); // Log the error for debugging
       emit(AuthError('Failed to log out: ${e.toString()}'));
     }
   }

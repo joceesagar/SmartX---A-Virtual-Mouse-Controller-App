@@ -16,12 +16,17 @@ class ScannedDevices extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 90,
+        backgroundColor: Colors.grey[850],
+        surfaceTintColor: Colors.grey[850],
         elevation: 20,
         title: Column(
           children: [
             const Text(
               'Scanned BLE Devices',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 28,
+                  color: Colors.white),
             ),
             const SizedBox(
               height: 5,
@@ -30,8 +35,10 @@ class ScannedDevices extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 const Text("Status: ",
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
                 BlocBuilder<BleCubit, BleState>(
                   builder: (context, state) {
                     if (state is BleConnected) {
@@ -60,26 +67,34 @@ class ScannedDevices extends StatelessWidget {
           ],
         ),
       ),
+      backgroundColor: Colors.grey[900],
       body: BlocBuilder<BleCubit, BleState>(
         builder: (context, state) {
           // Directly accessing devices from BleScanSuccess state
           final devices = context.read<BleCubit>().devices;
           if (state is BleScanning) {
-            return const Expanded(
-                child: Center(
+            return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Center(child: CircularProgressIndicator()),
+                  SizedBox(
+                    height: 70,
+                  ),
+                  Center(
+                      child: CircularProgressIndicator(
+                    color: Colors.white,
+                  )),
                   SizedBox(
                     height: 10,
                   ),
                   Text("Scanning...",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
                 ],
               ),
-            ));
+            );
           }
 
           return Column(
@@ -94,8 +109,9 @@ class ScannedDevices extends StatelessWidget {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Card(
+                        color: Colors.grey[850],
                         shadowColor: Colors.black,
-                        elevation: 20,
+                        elevation: 30,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
@@ -114,15 +130,21 @@ class ScannedDevices extends StatelessWidget {
                                         : 'Unnamed Device',
                                     style: const TextStyle(
                                         fontSize: 16,
-                                        fontWeight: FontWeight.bold),
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     'ID: ${device.id}',
-                                    style: const TextStyle(color: Colors.grey),
+                                    style: TextStyle(color: Colors.grey[350]),
                                   ),
                                   const SizedBox(height: 8),
-                                  Text('RSSI: ${device.rssi}'),
+                                  Text(
+                                    'RSSI: ${device.rssi}',
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
                                   (device.connectable == Connectable.available)
                                       ? const Text(
                                           'Connectable',
@@ -141,16 +163,16 @@ class ScannedDevices extends StatelessWidget {
                                 },
                                 style: ButtonStyle(
                                     backgroundColor: WidgetStatePropertyAll(
-                                        Colors.grey[200]),
+                                        Colors.grey[900]),
                                     shadowColor: const WidgetStatePropertyAll(
                                         Colors.black),
                                     elevation:
-                                        const WidgetStatePropertyAll(10)),
+                                        const WidgetStatePropertyAll(20)),
                                 child: const Text(
                                   "Connect",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.green,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
@@ -175,10 +197,10 @@ class ScannedDevices extends StatelessWidget {
                       },
                       style: ButtonStyle(
                           backgroundColor:
-                              WidgetStatePropertyAll(Colors.grey[200]),
+                              WidgetStatePropertyAll(Colors.grey[850]),
                           shadowColor:
                               const WidgetStatePropertyAll(Colors.black),
-                          elevation: const WidgetStatePropertyAll(10)),
+                          elevation: const WidgetStatePropertyAll(30)),
                       child: const Row(
                         children: [
                           Icon(Icons.refresh),
@@ -190,7 +212,7 @@ class ScannedDevices extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.green,
+                              color: Colors.white,
                             ),
                           ),
                         ],

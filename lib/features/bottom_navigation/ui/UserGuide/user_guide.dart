@@ -9,14 +9,24 @@ class GestureManualWidget extends StatelessWidget {
       description: 'Swipe left to go back or dismiss an item.',
     ),
     GestureInfo(
-      gifPath: 'assets/gifs/left_swipe.gif',
+      gifPath: 'assets/gifs/right_swipe.gif',
       title: 'Right Swipe',
       description: 'Swipe right to mark an item as done.',
     ),
     GestureInfo(
-      gifPath: 'assets/gifs/left_swipe.gif',
-      title: 'Tap',
-      description: 'Tap to select or open an item.',
+      gifPath: 'assets/gifs/left_click.gif',
+      title: 'Left Click',
+      description: 'Tap with index finger to select or interact with an item.',
+    ),
+    GestureInfo(
+      gifPath: 'assets/gifs/scroll.gif',
+      title: 'Scroll',
+      description: 'Swipe up or down to navigate through the content.',
+    ),
+    GestureInfo(
+      gifPath: 'assets/gifs/right_click.gif',
+      title: 'Right Click',
+      description: 'Tap with middle finger to select or interact with an item.',
     ),
   ];
 
@@ -25,8 +35,8 @@ class GestureManualWidget extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[900],
       appBar: AppBar(
-        title:
-            const Text('Gesture Guide', style: TextStyle(color: Colors.white)),
+        title: const Text('Gesture Guide',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.grey[850],
         surfaceTintColor: Colors.grey[850],
         elevation: 20,
