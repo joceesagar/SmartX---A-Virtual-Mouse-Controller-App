@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 part 'ble_state.dart';
 
-const deviceID = "48:27:E2:D3:14:01";
+const deviceID = "48:27:E2:D3:13:DD";
 
 class BleCubit extends Cubit<BleState> {
   final FlutterReactiveBle _ble = FlutterReactiveBle();
@@ -150,44 +148,64 @@ class BleCubit extends Cubit<BleState> {
     }
   }
 
+  StreamSubscription? connectionSubscription;
+
   /// Connect to a device
   Future<void> connectToDevice(String deviceId) async {
     try {
       emit(BleConnecting());
       bool isNavigated = false;
+      final prefs = SpService();
 
+      // Connect to the BLE device
       final connectionStream = _ble.connectToDevice(
         id: deviceId,
-        connectionTimeout: const Duration(seconds: 5), // Adjusted timeout
+        connectionTimeout: const Duration(seconds: 5),
       );
 
-      connectionStream.listen(
-        (connectionState) {
-          if (connectionState.connectionState ==
-                  DeviceConnectionState.connected &&
-              !isNavigated) {
-            isNavigated = true;
-            final prefs = SpService();
-            prefs.setConnectedDeviceId(deviceId); // Save connection
-            emit(BleConnected(deviceId));
-            Get.snackbar('Connected', 'Bluetooth Connected Successfully',
-                margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 1),
-                colorText: Colors.white);
-            Get.off(() => const HomePage());
-          } else if (connectionState.connectionState ==
-                  DeviceConnectionState.disconnected &&
-              !isNavigated) {
-            isNavigated = true;
-            emit(BleDisconnected());
-            Get.snackbar('Failed', 'Failed to Connect to the device',
-                margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 1),
-                colorText: Colors.white);
+      // Subscription to handle connection state updates
+      connectionSubscription?.cancel(); //cancel any previous suscription
+      connectionSubscription = connectionStream.listen(
+        (connectionState) async {
+          switch (connectionState.connectionState) {
+            case DeviceConnectionState.connected:
+              if (!isNavigated) {
+                isNavigated = true;
+                await prefs
+                    .setConnectedDeviceId(deviceId); // Save connection info
+                emit(BleConnected(deviceId));
+                Get.to(() => const HomePage());
+
+                Get.snackbar('Connected', 'Bluetooth Connected Successfully',
+                    margin:
+                        const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.green,
+                    duration: const Duration(seconds: 1),
+                    colorText: Colors.white);
+              }
+              break;
+
+            case DeviceConnectionState.disconnected:
+              if (!isNavigated) {
+                isNavigated = true;
+                emit(BleDisconnected());
+
+                Get.snackbar('Failed', 'Failed to Connect to the device',
+                    margin:
+                        const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 1),
+                    colorText: Colors.white);
+
+                // Cancel subscription after handling disconnection
+                await connectionSubscription?.cancel();
+              }
+              break;
+
+            default:
+              break;
           }
         },
         onError: (error) {
@@ -203,47 +221,72 @@ class BleCubit extends Cubit<BleState> {
   /// Reconnect to a device
   Future<void> _reconnectToDevice(String deviceId) async {
     try {
-      emit(BleConnecting());
-      if (state is BleConnecting) {
-        Get.snackbar('Reconnecting', 'Please wait for some time',
-            margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
-            duration: const Duration(seconds: 1),
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.amber[100]);
-      }
+      // Show "Reconnecting" snackbar before emitting state
+      Get.snackbar(
+        'Reconnecting',
+        'Please wait for some time',
+        margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+        duration: const Duration(seconds: 1),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.amber[100],
+      );
 
+      emit(BleConnecting());
+
+      // Start connection attempt
       final connectionStream = _ble.connectToDevice(
         id: deviceId,
         connectionTimeout: const Duration(seconds: 5),
       );
 
-      connectionStream.listen(
-        (connectionState) {
-          if (connectionState.connectionState ==
-              DeviceConnectionState.connected) {
-            final prefs = SpService();
-            prefs.setConnectedDeviceId(deviceId);
-            emit(BleConnected(deviceId));
-            // Get.to(() => const HomePage());
-            Get.snackbar('Reconnected', 'Bluetooth Reconnected to $deviceId',
+      // Manage stream subscription
+      connectionSubscription?.cancel(); //cancel any previous suscription
+      connectionSubscription = connectionStream.listen(
+        (connectionState) async {
+          switch (connectionState.connectionState) {
+            case DeviceConnectionState.connected:
+              final prefs = SpService();
+              await prefs.setConnectedDeviceId(deviceId); // Ensure completion
+
+              emit(BleConnected(deviceId));
+              // Navigate to HomePage
+              Get.to(() => const HomePage());
+
+              Get.snackbar(
+                'Reconnected',
+                'Bluetooth Reconnected to $deviceId',
                 margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
                 duration: const Duration(seconds: 1),
                 snackPosition: SnackPosition.BOTTOM,
                 backgroundColor: Colors.green,
-                colorText: Colors.white);
-          } else if (connectionState.connectionState ==
-              DeviceConnectionState.disconnected) {
-            Get.snackbar('Failed', 'Failed to Connect to the device',
+                colorText: Colors.white,
+              );
+
+              break;
+
+            case DeviceConnectionState.disconnected:
+              Get.snackbar(
+                'Failed',
+                'Failed to Connect to the device',
                 margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
                 duration: const Duration(seconds: 1),
                 snackPosition: SnackPosition.BOTTOM,
                 backgroundColor: Colors.red,
-                colorText: Colors.white); // Reconnect failed
-            emit(BleDisconnected());
+                colorText: Colors.white,
+              );
+              emit(BleDisconnected());
+
+              // Cancel subscription after handling disconnection
+              await connectionSubscription?.cancel();
+              break;
+
+            default:
+              break;
           }
         },
-        onError: (error) {
+        onError: (error) async {
           emit(BleError('Reconnection error: $error'));
+          await connectionSubscription?.cancel();
         },
       );
     } catch (e) {
@@ -355,19 +398,43 @@ class BleCubit extends Cubit<BleState> {
       QualifiedCharacteristic characteristic, String jsonPayload) async {
     print("Checking connection before writing...");
 
-    print(_ble.readCharacteristic(characteristic));
-
     int retryCount = 5; // Maximum retries
-    while (retryCount > 0) {
-      final connectionState = await _ble.statusStream.first;
+
+    // Ensure BLE is ready before proceeding
+    await for (final connectionState in _ble.statusStream) {
       if (connectionState == BleStatus.ready) {
-        break; // Exit loop if BLE is ready
+        break;
+      }
+      if (--retryCount == 0) {
+        print("BLE is not ready after multiple attempts.");
+        Get.snackbar("Error", "BLE not ready",
+            backgroundColor: Colors.red,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10));
+        return;
       }
       print("BLE is not ready. Retrying connection...");
       await Future.delayed(const Duration(seconds: 2));
-      retryCount--;
     }
 
+    // // Ensure bonding is complete before writing
+    // await Future.delayed(const Duration(seconds: 3));
+
+    // Ensure services are discovered
+    try {
+      print("Discovering services...");
+      await _ble.discoverAllServices(characteristic.deviceId);
+      print("Services discovered successfully.");
+    } catch (e) {
+      print("Error discovering services: $e");
+      Get.snackbar("Error", "Service discovery failed",
+          backgroundColor: Colors.red,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10));
+      return;
+    }
+
+// Attempt to write
     try {
       print("Device is connected. Attempting to write...");
       await _ble.writeCharacteristicWithoutResponse(
@@ -381,7 +448,12 @@ class BleCubit extends Cubit<BleState> {
           snackPosition: SnackPosition.BOTTOM,
           margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10));
     } catch (e) {
-      rethrow; // Rethrow the error so `subscribeAndWrite` can catch it.
+      print("Error writing to BLE: $e");
+      Get.snackbar("Error", "Failed to write value",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10));
     }
   }
 
@@ -404,54 +476,91 @@ class BleCubit extends Cubit<BleState> {
     return false;
   }
 
-  final _positionController =
-      StreamController<Map<String, double>>.broadcast(); // StreamController
+  // final _positionController =
+  //     StreamController<Map<String, double>>.broadcast(); // StreamController
 
-  Stream<Map<String, double>> get positionStream =>
-      _positionController.stream; // Expose the stream
+  // Stream<Map<String, double>> get positionStream =>
+  //     _positionController.stream; // Expose the stream
 
-  void readFromBle() async {
-    print("BLE IS LISTENING.......");
-    // await _ble.subscribeToCharacteristic(characteristic).listen(
-    // (data) {
-    // print("Received Data: $data"); // Raw data in list format
-    // String decodedData = String.fromCharCodes(data);
-    // print("Received Decoded Data: $decodedData"); // Convert to ASCII string
+  // void readFromBle() async {
+  //   print("BLE IS LISTENING.......");
+  //   await _ble.subscribeToCharacteristic(characteristic).listen((data) {
+  //     print("Received Data: $data"); // Raw data in list format
+  //     String decodedData = String.fromCharCodes(data);
+  //     print("Received Decoded Data: $decodedData"); // Convert to ASCII string
 
-    print("Simulating BLE data (-5 to 5)...");
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      // Generate random x and y values between -5 and 5
-      double x = Random().nextDouble() * 10 - 5;
-      double y = Random().nextDouble() * 10 - 5;
+  //     // print("Simulating BLE data (-5 to 5)...");
+  //     // Timer.periodic(const Duration(seconds: 1), (timer) {
+  //     //   // Generate random x and y values between -5 and 5
+  //     //   double x = Random().nextDouble() * 10 - 5;
+  //     //   double y = Random().nextDouble() * 10 - 5;
 
-      // Simulate receiving data by creating a comma separated string
-      String decodedData = "${x.toStringAsFixed(2)},${y.toStringAsFixed(2)}";
+  //     //   // Simulate receiving data by creating a comma separated string
+  //     //   String decodedData = "${x.toStringAsFixed(2)},${y.toStringAsFixed(2)}";
 
-      try {
-        List<String> values = decodedData.split(',');
-        if (values.length == 2) {
-          double x = double.parse(values[0]);
-          double y = double.parse(values[1]);
-          _positionController
-              .add({'x': x, 'y': y}); // Add parsed values to the stream
-        } else {
-          print("Invalid data format");
-        }
-      } catch (e) {
-        print("Error parsing data: $e");
-      }
-      // },
-      // onError: (dynamic error) {
-      //   print("Error: $error"); // Debugging: Print error if any
-      // },
-      // );
-    });
-  }
+  //     try {
+  //       List<String> values = decodedData.split(',');
+  //       if (values.length == 2) {
+  //         double x = double.parse(values[0]);
+  //         double y = double.parse(values[1]);
+  //         _positionController
+  //             .add({'x': x, 'y': y}); // Add parsed values to the stream
+  //       } else {
+  //         print("Invalid data format");
+  //       }
+  //     } catch (e) {
+  //       print("Error parsing data: $e");
+  //     }
+  //     // },
+  //     // onError: (dynamic error) {
+  //     //   print("Error: $error"); // Debugging: Print error if any
+  //     // },
+  //     // );
+  //   });
+  // }
+
+  // Future<void> readFromBle() async {
+  //   print("BLE IS LISTENING.......");
+  //   try {
+  //     await _ble.subscribeToCharacteristic(characteristic).listen((data) {
+  //       print("Received Data: $data"); // Raw data in list format
+  //       String decodedData = String.fromCharCodes(data);
+  //       print("Received Decoded Data: $decodedData"); // Convert to ASCII string
+
+  //       try {
+  //         // Decode the JSON string
+  //         Map<String, dynamic> jsonData = jsonDecode(decodedData);
+
+  //         // Extract rotation values
+  //         double xr = (jsonData['XR'] as num).toDouble();
+  //         double yr = (jsonData['YR'] as num).toDouble();
+  //         double zr = (jsonData['ZR'] as num).toDouble();
+
+  //         // Add rotation values to the stream
+  //         _positionController.add({'XR': xr, 'YR': yr, 'ZR': zr});
+  //       } catch (e) {
+  //         print("Error parsing JSON: $e");
+  //       }
+  //     });
+  //   } on PlatformException catch (e) {
+  //     if (e.code == "service_discovery_failure") {
+  //       print("[ERROR] Service discovery failed due to bonding: ${e.message}");
+  //       await Future.delayed(const Duration(seconds: 2));
+  //       readFromBle(); // Retry
+  //     } else {
+  //       print("[ERROR] Error subscribing to characteristic: $e");
+  //     }
+  //   } catch (e) {
+  //     print("[ERROR] Error in readFromBle: $e");
+  //   }
+  // }
 
   @override
   Future<void> close() {
+    // _positionController.close();
     _ble.deinitialize(); // Clean up resources when the cubit is disposed
     stopMonitoringConnection(); // Cancel the subscription when the cubit is closed
+    connectionSubscription?.cancel();
     return super.close();
   }
 }

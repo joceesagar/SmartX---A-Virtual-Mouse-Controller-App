@@ -1,11 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/core/services/sp_service.dart';
 import 'package:frontend/features/auth/cubit/auth_cubit.dart';
 import 'package:frontend/features/auth/cubit/ble_cubit.dart';
-import 'package:frontend/features/auth/pages/signup_page.dart';
 
-class InfoPage extends StatelessWidget {
+class InfoPage extends StatefulWidget {
   const InfoPage({super.key});
+
+  @override
+  State<InfoPage> createState() => _InfoPageState();
+}
+
+class _InfoPageState extends State<InfoPage> {
+  final service = SpService();
+  String? guestName;
+  String? guestId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    guestName = await service.getGuestName();
+    guestId = await service.getGuestId();
+    setState(() {}); // Update the UI after fetching data
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +49,8 @@ class InfoPage extends StatelessWidget {
             _buildInfoSection("Device Name", "MotionX"),
             _buildInfoSection("Device ID", "48:27:E2:D3:13:DD"),
             _buildInfoSection("MAC Address", "00:1A:7D:DA:71:13"),
-            _buildInfoSection("User Name", "Guest ID"),
-            _buildInfoSection("User ID", "9876543210"),
+            _buildInfoSection("User Name", guestName.toString()),
+            _buildInfoSection("User ID", guestId.toString()),
             const SizedBox(height: 20),
             _buildActionButton("Disconnect", Colors.red, () {
               // Add Disconnect functionality here

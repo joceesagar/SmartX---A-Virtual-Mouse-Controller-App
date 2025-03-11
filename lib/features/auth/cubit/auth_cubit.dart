@@ -1,16 +1,11 @@
 import 'dart:math';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:frontend/core/services/sp_service.dart';
 import 'package:frontend/features/auth/cubit/ble_cubit.dart';
-import 'package:frontend/features/auth/pages/login_page.dart';
-import 'package:frontend/features/auth/pages/signup_page.dart';
-
 import 'package:frontend/features/auth/repository/auth_remote_repository.dart';
 import 'package:frontend/models/user_models.dart';
-import 'package:get/get.dart';
 
 part 'auth_state.dart';
 

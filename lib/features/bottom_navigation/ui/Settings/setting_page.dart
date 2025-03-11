@@ -17,7 +17,7 @@ Future<String?> connectedDeviceId() async {
 }
 
 final characteristic = QualifiedCharacteristic(
-  deviceId: "48:27:E2:D3:14:01",
+  deviceId: "48:27:E2:D3:13:DD",
   serviceId: Uuid.parse("785e99cc-e61f-41b0-899e-f59fa295441a"),
   characteristicId: Uuid.parse("7fb99b10-d067-42f2-99f4-b515e595c91c"),
 );

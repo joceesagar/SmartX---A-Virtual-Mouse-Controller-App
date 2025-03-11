@@ -61,7 +61,7 @@ class HomePageState extends State<HomePage> {
     {
       'icon': Icons.info_outline,
       'label': 'Info',
-      'page': const InfoPage(),
+      'page': InfoPage(),
     },
   ];
 

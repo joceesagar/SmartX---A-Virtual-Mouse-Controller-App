@@ -95,6 +95,52 @@ class ScannedDevices extends StatelessWidget {
                 ],
               ),
             );
+          } else if (state is BleNoDevicesFound) {
+            return Center(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "No Devices Found Please Refresh.",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(
+                      width: 150,
+                      height: 60,
+                      child: ElevatedButton(
+                          key: const Key("Refresh"),
+                          onPressed: () async {
+                            // Trigger the scanning process
+                            context.read<BleCubit>().startScan();
+                          },
+                          style: ButtonStyle(
+                              backgroundColor:
+                                  WidgetStatePropertyAll(Colors.grey[850]),
+                              shadowColor:
+                                  const WidgetStatePropertyAll(Colors.black),
+                              elevation: const WidgetStatePropertyAll(30)),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.refresh),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                "Refresh",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          )),
+                    ),
+                  ]),
+            );
           }
 
           return Column(

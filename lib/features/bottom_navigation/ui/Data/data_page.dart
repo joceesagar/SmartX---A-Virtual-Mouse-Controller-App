@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cube/flutter_cube.dart';
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:frontend/features/auth/cubit/ble_cubit.dart';
 
 class VirtualHandScreen extends StatefulWidget {
@@ -19,6 +21,8 @@ class VirtualHandScreenState extends State<VirtualHandScreen> {
 
   // Stream subscription for BLE position updates
   StreamSubscription<Map<String, double>>? _positionStreamSubscription;
+  StreamSubscription? _bleCharacteristicSubscription;
+  final FlutterReactiveBle _ble = FlutterReactiveBle();
 
   @override
   void initState() {
@@ -33,16 +37,49 @@ class VirtualHandScreenState extends State<VirtualHandScreen> {
 
   void startListeningToBle() {
     print("Function has been called. Waiting for data...");
-    context.read<BleCubit>().readFromBle();
+    final bleCubit = context.read<BleCubit>();
+    final characteristic = bleCubit.characteristic; // Get the characteristic
 
-    // Listen to the BLE position stream
-    _positionStreamSubscription =
-        context.read<BleCubit>().positionStream.listen((position) {
-      if (mounted) {
-        updateHandPosition(position['x']!, position['y']!, z); // Update x and y
+    _bleCharacteristicSubscription =
+        _ble.subscribeToCharacteristic(characteristic).listen((data) {
+      print("Received Data: $data");
+      String decodedData = String.fromCharCodes(data);
+      print("Received Decoded Data: $decodedData");
+
+      try {
+        Map<String, dynamic> jsonData = jsonDecode(decodedData);
+        double xr = (jsonData['XR'] as num).toDouble();
+        double yr = (jsonData['YR'] as num).toDouble();
+        double zr = (jsonData['ZR'] as num).toDouble();
+        if (mounted) {
+          setState(() {
+            rotationX = xr;
+            rotationY = yr;
+            rotationZ = zr;
+            hand.rotation.setValues(rotationX, rotationY, rotationZ);
+            hand.updateTransform();
+          });
+        }
+      } catch (e) {
+        print("Error parsing JSON: $e");
       }
+    }, onError: (dynamic error) {
+      print("Error: $error");
     });
   }
+
+  // void startListeningToBle() {
+  //   print("Function has been called. Waiting for data...");
+  //   context.read<BleCubit>().readFromBle();
+
+  //   // Listen to the BLE position stream
+  //   _positionStreamSubscription =
+  //       context.read<BleCubit>().positionStream.listen((position) {
+  //     if (mounted) {
+  //       updateHandRotation(position['XR']!, position['YR']!, position['ZR']!);
+  //     }
+  //   });
+  // }
 
   void updateHandPosition(double newX, double newY, double newZ) {
     if (mounted) {
@@ -79,6 +116,8 @@ class VirtualHandScreenState extends State<VirtualHandScreen> {
   void dispose() {
     // Cancel the stream subscription when the widget is disposed
     _positionStreamSubscription?.cancel();
+    _positionStreamSubscription = null; // Prevent potential memory leaks
+    _bleCharacteristicSubscription!.cancel();
     super.dispose();
   }
 
@@ -109,35 +148,35 @@ class VirtualHandScreenState extends State<VirtualHandScreen> {
               ),
             ),
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Column(
-                  children: [
-                    buildSlider("X Position", x, -5, 5, (value) {
-                      updateHandPosition(value, y, z);
-                    }),
-                    buildSlider("Y Position", y, -5, 5, (value) {
-                      updateHandPosition(x, value, z);
-                    }),
-                    buildSlider("Z Position", z, -5, 5, (value) {
-                      updateHandPosition(x, y, value);
-                    }),
-                    buildSlider("Rotation X", rotationX, -180, 180, (value) {
-                      updateHandRotation(value, rotationY, rotationZ);
-                    }),
-                    buildSlider("Rotation Y", rotationY, -180, 180, (value) {
-                      updateHandRotation(rotationX, value, rotationZ);
-                    }),
-                    buildSlider("Rotation Z", rotationZ, -180, 180, (value) {
-                      updateHandRotation(rotationX, rotationY, value);
-                    }),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          // Expanded(
+          //   child: SingleChildScrollView(
+          //     child: Padding(
+          //       padding: const EdgeInsets.only(top: 10),
+          //       child: Column(
+          //         children: [
+          //           buildSlider("X Position", x, -5, 5, (value) {
+          //             updateHandPosition(value, y, z);
+          //           }),
+          //           buildSlider("Y Position", y, -5, 5, (value) {
+          //             updateHandPosition(x, value, z);
+          //           }),
+          //           buildSlider("Z Position", z, -5, 5, (value) {
+          //             updateHandPosition(x, y, value);
+          //           }),
+          //           buildSlider("Rotation X", rotationX, -180, 180, (value) {
+          //             updateHandRotation(value, rotationY, rotationZ);
+          //           }),
+          //           buildSlider("Rotation Y", rotationY, -180, 180, (value) {
+          //             updateHandRotation(rotationX, value, rotationZ);
+          //           }),
+          //           buildSlider("Rotation Z", rotationZ, -180, 180, (value) {
+          //             updateHandRotation(rotationX, rotationY, value);
+          //           }),
+          //         ],
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

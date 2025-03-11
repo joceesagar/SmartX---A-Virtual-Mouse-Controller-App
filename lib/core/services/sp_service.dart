@@ -59,6 +59,11 @@ class SpService {
     return prefs.getString('guestId');
   }
 
+  Future<String?> getGuestName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('guestName');
+  }
+
   /// Clears guest login details and logs out
   Future<void> guestLogout() async {
     final prefs = await SharedPreferences.getInstance();
@@ -83,14 +88,6 @@ class SpService {
     'HO': 'true', // Haptic Output
     'HM': //Haptic Mode
         '0', //  Select between different tracking styles, such as smooth tracking vs. raw tracking (instant response).
-
-    //Customization Page
-    'leftClick': 'Index', // Default left click,
-    'rightClick': 'Ring', // Default right click,
-    'doubleClick': 'Index', // Default double click,
-    'scrollGesture': 'IndexMiddle', // Default scroll gesture,
-    'scrollSpeed': '20.0', // Default scroll speed,
-    'device_name': 'Default Device', // Default name for the device
   };
 
   /// Initialize default values in SharedPreferences if not already set.
